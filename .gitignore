@@ -1,0 +1,16 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+.next/
+
+# Data / secrets
+data/snapshot/*.duckdb
+.env
+.env.local
+
+# OS
+.DS_Store

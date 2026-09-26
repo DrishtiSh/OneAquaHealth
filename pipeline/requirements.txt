@@ -1,0 +1,9 @@
+pymc
+numpy
+pandas
+duckdb
+requests
+osmnx
+geopandas
+shapely
+python-dotenv

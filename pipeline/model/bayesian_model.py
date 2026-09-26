@@ -1,0 +1,1 @@
+"""Stage 5: Fit a Bayesian model (PyMC, NUTS sampler) estimating two latent scores per site/week: W (water quality) and H (human-health-relevant risk), with uncertainty intervals, not point guesses."""
