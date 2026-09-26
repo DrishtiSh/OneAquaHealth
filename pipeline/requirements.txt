@@ -6,4 +6,9 @@ requests
 osmnx
 geopandas
 shapely
+networkx
 python-dotenv
+pydantic
+faker
+pyarrow
+pytest

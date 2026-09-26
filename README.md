@@ -47,7 +47,7 @@ disease-vector exposure), without pretending to be a validated scientific instru
 ```bash
 source .venv/bin/activate
 pip install -r pipeline/requirements.txt
-python pipeline/main.py
+python -m pipeline.main
 ```
 
 ### API

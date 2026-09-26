@@ -2,6 +2,7 @@
 .venv/
 __pycache__/
 *.pyc
+.pytest_cache/
 
 # Node
 node_modules/
@@ -9,8 +10,12 @@ node_modules/
 
 # Data / secrets
 data/snapshot/*.duckdb
+data/raw/_cache/
 .env
 .env.local
+
+# osmnx's on-disk HTTP cache (created wherever it's invoked from)
+cache/
 
 # OS
 .DS_Store
