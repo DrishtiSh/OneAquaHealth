@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 import os
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 import pandas as pd
@@ -41,7 +41,7 @@ def _load_real_observations() -> pd.DataFrame | None:
 
     base_url = os.environ[config.OAH_API_BASE_URL_ENV]
     api_token = os.environ.get(config.OAH_API_TOKEN_ENV)
-    since = date.today().replace(year=date.today().year - 1)
+    since = date.today() - timedelta(days=365)  # not .replace(year=...): raises on Feb 29
     logger.info("Fetching real observations from %s since %s", base_url, since)
     real_df = real_source.fetch_real_observations(base_url, api_token, since)
     logger.info("Fetched %d real observation(s).", len(real_df))

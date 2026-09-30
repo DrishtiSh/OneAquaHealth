@@ -29,6 +29,7 @@ def test_exposure_features_are_dense_and_valid(exposure_df, sites_df):
     assert set(exposure_df["site_id"]) <= set(sites_df["site_id"])
 
 
+@pytest.mark.network
 def test_real_fetch_finds_at_least_one_poi(exposure_df):
     assert (exposure_df["data_source"] == "real").all()
     assert exposure_df["nearest_poi_distance_m"].notna().any()

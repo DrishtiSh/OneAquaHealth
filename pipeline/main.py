@@ -1,9 +1,11 @@
 """Orchestrates the offline pipeline end to end: ingestion -> weather -> graph ->
 exposure -> model -> detectors -> nlg -> freeze_snapshot (stages 1-8)."""
 
+from pipeline.detectors import detectors
 from pipeline.exposure import exposure
 from pipeline.graph import river_graph
 from pipeline.ingestion import ingest
+from pipeline.model import bayesian_model
 from pipeline.weather import weather
 
 
@@ -16,7 +18,11 @@ def run():
     river_graph.run()
     print("Stage 4: exposure")
     exposure.run()
-    raise NotImplementedError("Stages 5-8 not yet implemented")
+    print("Stage 5: Bayesian model (W/H)")
+    bayesian_model.run()
+    print("Stage 6: detectors")
+    detectors.run()
+    raise NotImplementedError("Stages 7-8 not yet implemented")
 
 
 if __name__ == "__main__":

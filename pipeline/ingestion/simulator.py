@@ -18,7 +18,6 @@ hard-fails on lack of network.
 from __future__ import annotations
 
 import logging
-import uuid
 from datetime import date, datetime, timedelta
 
 import numpy as np
@@ -42,6 +41,11 @@ EVENT_RATE_PER_WEEK = 1.0 / 12.0
 RAIN_TRIGGER_PROB = 0.65
 
 MISREPORT_PROB = 0.04
+
+
+def _seeded_hex(id_rng: np.random.Generator) -> str:
+    """32-char hex ID drawn from a dedicated seeded stream (reproducible, unlike uuid4)."""
+    return f"{int(id_rng.integers(0, 2**63)):016x}{int(id_rng.integers(0, 2**63)):016x}"
 
 
 def _weekly_rainfall(sites_df: pd.DataFrame, weeks: list[date]) -> tuple[np.ndarray, bool]:
@@ -75,6 +79,7 @@ def _make_events(
     n_events = rng.poisson(EVENT_RATE_PER_WEEK * n_weeks)
     n_events = max(n_events, 4)  # guarantee a demo-worthy number of events
 
+    id_rng = np.random.default_rng([config.RANDOM_SEED, 1])
     events = []
     for _ in range(n_events):
         rain_triggered = bool(rng.random() < RAIN_TRIGGER_PROB and len(heavy_rain_week_idxs) > 0)
@@ -97,7 +102,7 @@ def _make_events(
 
         events.append(
             {
-                "event_id": uuid.uuid4().hex,
+                "event_id": _seeded_hex(id_rng),
                 "source_site_id": str(source_site_id),
                 "start_week": weeks[start_idx],
                 "end_week": weeks[end_idx],
@@ -251,7 +256,10 @@ def generate_observations(
     }
     event_type_by_id = dict(zip(events_df["event_id"], events_df["event_type"]))
 
+    # Ingestion timestamp is metadata only; IDs come from a dedicated seeded stream so
+    # they are reproducible without perturbing the main rng (which drives the data).
     now = datetime.now()
+    id_rng = np.random.default_rng([config.RANDOM_SEED, 2])
     rows = []
     for _, gt in ground_truth_df.iterrows():
         sid = gt["site_id"]
@@ -286,9 +294,14 @@ def generate_observations(
             )
             notes = _make_notes(site_name[sid], smell, trash_level, clarity, rng) if rng.random() < completeness else None
 
+            reported_presence = _maybe(insect_presence)
+            # Diversity is 0 (not missing) when the observer reported no insects; otherwise
+            # it is gated only by the observer's own completeness, never by the hidden truth.
+            reported_diversity = 0 if reported_presence is False else _maybe(insect_diversity)
+
             rows.append(
                 {
-                    "observation_id": uuid.uuid4().hex,
+                    "observation_id": _seeded_hex(id_rng),
                     "site_id": sid,
                     "observed_at": observed_at,
                     "week_start": gt["week_start"],
@@ -297,8 +310,8 @@ def generate_observations(
                     "smell": _maybe(smell),
                     "smell_intensity": _maybe(smell_intensity),
                     "trash_level": _maybe(trash_level),
-                    "insect_presence": _maybe(insect_presence),
-                    "insect_diversity": _maybe(insect_diversity) if insect_presence else None,
+                    "insect_presence": reported_presence,
+                    "insect_diversity": reported_diversity,
                     "notes": notes,
                     "source": "simulated",
                     "ingested_at": now,

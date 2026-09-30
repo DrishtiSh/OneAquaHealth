@@ -11,6 +11,9 @@ node_modules/
 # Data / secrets
 data/snapshot/*.duckdb
 data/raw/_cache/
+# Stage 5 posterior draws (~12 MB each): regenerate identically with
+# `python -m pipeline.model.bayesian_model` (fixed seed).
+data/processed/model_draws*.nc
 .env
 .env.local
 

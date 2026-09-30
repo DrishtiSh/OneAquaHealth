@@ -74,7 +74,14 @@ def test_fallback_when_osm_unavailable(sites_df, monkeypatch):
     assert abs(graph["gow-01"]["gow-02"]["distance_m"] - 325.6) < 1.0
 
 
-def test_load_graph_matches_built_graph(graph_and_used_live):
+def test_load_graph_matches_built_graph(graph_and_used_live, tmp_path, monkeypatch):
+    # Redirect outputs so the test never overwrites real data/processed files.
+    from pipeline.common import config, io_utils
+
+    sites_path, edges_path = tmp_path / "sites.parquet", tmp_path / "edges.parquet"
+    io_utils.write_parquet(get_sites_df(), sites_path)
+    monkeypatch.setattr(config, "SITES_PATH", sites_path)
+    monkeypatch.setattr(config, "RIVER_GRAPH_EDGES_PATH", edges_path)
     river_graph.run()
     loaded = river_graph.load_graph()
     built, _ = graph_and_used_live

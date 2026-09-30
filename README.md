@@ -33,6 +33,34 @@ disease-vector exposure), without pretending to be a validated scientific instru
 11. **Benchmark** — test the whole pipeline against the simulator's known ground truth,
     reporting real accuracy numbers (including misses), not just success stories.
 
+### Stage 5 model notes
+
+- `W` (water quality, higher = cleaner) and `H` (contamination hazard, higher = riskier) are
+  **relative 0-100 indices anchored to the citizen rubrics** (`water_clarity` 1-5, where 1 = clear
+  and 5 = murky; `smell_intensity` 0-3), not calibrated measurements. Every site-week carries
+  a 90% interval and an `evidence` flag (`sufficient` / `weak` / `insufficient`).
+- Variants: `M1` (primary: slow per-site drift + sparse contamination excursions, rain as a weak
+  covariate), `M1_norain` (ablation for checking the rain -> overflow finding is not built in),
+  `M0` (no excursions). Outputs land in `data/processed/model_*` (scores, joint posterior draws,
+  parameters, diagnostics). A fit that fails the convergence gate writes diagnostics only.
+- Exposure is deliberately **not** in the fit; `site_exposure_weights.parquet` is joined in Stage 7.
+- Sampler: PyMC + nutpie (NUTS, numba backend). PyTensor's C++ backend is disabled
+  (`cxx=`) because it does not build reliably on Windows.
+
+### Stage 6 detector notes
+
+- Every detector works per posterior draw, so results are probabilities, not yes/no calls.
+  Thresholds are fixed in `pipeline/common/config.py` (10-point W drop; confirmed at P >= 0.9,
+  possible at P >= 0.5) and were set before any comparison with the simulator's truth.
+- **Change** (M1): P(the contamination excursion pulled W down by > 10 points) per site-week.
+  A week with no reports, or a bimodal (mixing-flagged) posterior, can be at most "possible".
+- **Entry point** (M1): nearby episodes form incidents; the source is the most upstream site
+  reachable through an unbroken run of dropping sites. Output: top source, probability, 80%
+  credible set, and an `upstream_unobserved` caveat when the upstream neighbour had no reports.
+- **Rain -> overflow** (M1_norain, because M1 already assumes rain matters): incidence rate ratio
+  in rain vs dry weeks, a shifted-rain placebo test, and raw sewage-smell shares. M1's rain
+  coefficient is reported only as corroboration.
+
 ## Structure
 
 - `pipeline/` — Python offline pipeline (stages 1-8, 12): ingestion, weather, graph, exposure,
@@ -49,6 +77,10 @@ source .venv/bin/activate
 pip install -r pipeline/requirements.txt
 python -m pipeline.main
 ```
+The week grid is pinned (`DEFAULT_ANCHOR_DATE` in `pipeline/common/config.py`), so a rerun
+regenerates the committed data. Set `OAH_ANCHOR_DATE=today` to refresh to current weeks instead.
+Stage 5's posterior draws (`data/processed/model_draws*.nc`) are not committed; run
+`python -m pipeline.model.bayesian_model` (about 6 minutes) before running Stage 6 on a fresh clone.
 
 ### API
 ```bash

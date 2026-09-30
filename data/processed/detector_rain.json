@@ -1,0 +1,50 @@
+{
+  "model_variant": "M1_norain",
+  "thresholds": {
+    "delta_W": 10.0,
+    "rain_lag_weeks": 1
+  },
+  "n_rain_exposed_weeks": 45,
+  "n_rain_exposed_weeks_with_reports": 45,
+  "n_observed_site_weeks": 441,
+  "pooled": {
+    "irr_median": 2.2638506608529774,
+    "irr_q05": 1.689346611610396,
+    "irr_q95": 3.263114865785529,
+    "p_irr_gt_1": 1.0,
+    "placebo_p": 0.01,
+    "verdict": "supported"
+  },
+  "cso_adjacent": {
+    "irr_median": 2.8022471910112356,
+    "irr_q05": 1.8792503741804922,
+    "irr_q95": 4.373811581676748,
+    "p_irr_gt_1": 1.0,
+    "placebo_p": 0.01,
+    "verdict": "supported"
+  },
+  "other_sites": {
+    "irr_median": 1.8461538461538463,
+    "irr_q05": 1.203314183165721,
+    "irr_q95": 2.9031276415891782,
+    "p_irr_gt_1": 0.99,
+    "placebo_p": 0.05,
+    "verdict": "inconclusive"
+  },
+  "n_placebo_shifts": 99,
+  "verdict": "supported",
+  "sewage_smell_share": {
+    "rain_weeks": 0.11057692307692307,
+    "dry_weeks": 0.03353658536585366,
+    "n_reports_rain": 208,
+    "n_reports_dry": 328
+  },
+  "corroboration_beta_rain": {
+    "model_variant": "M1",
+    "median": 0.6820609100815545,
+    "q05": 0.15393413343749804,
+    "q95": 1.2146480431870705,
+    "p_positive": 0.98,
+    "note": "Model-assisted (rain is inside this model's prior); supporting evidence only."
+  }
+}
