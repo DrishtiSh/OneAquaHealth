@@ -6,6 +6,8 @@ from pipeline.exposure import exposure
 from pipeline.graph import river_graph
 from pipeline.ingestion import ingest
 from pipeline.model import bayesian_model
+from pipeline.nlg import summarize
+from pipeline.snapshot import freeze_snapshot
 from pipeline.weather import weather
 
 
@@ -22,7 +24,10 @@ def run():
     bayesian_model.run()
     print("Stage 6: detectors")
     detectors.run()
-    raise NotImplementedError("Stages 7-8 not yet implemented")
+    print("Stage 7: plain-language findings")
+    summarize.run()
+    print("Stage 8: freeze snapshot")
+    freeze_snapshot.run()
 
 
 if __name__ == "__main__":

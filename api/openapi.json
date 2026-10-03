@@ -1,0 +1,638 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OneAquaHealth Insight API",
+    "version": "1.0.0",
+    "description": "Read-only API over the frozen OneAquaHealth snapshot (pipeline Stage 8). Every number was computed offline by the pipeline; the API only filters and reshapes. W (water quality, higher = cleaner) and H (contamination hazard, higher = riskier) are relative 0-100 indices anchored to citizen rubrics, not lab measurements, and always travel with a 90% interval (q05-q95) and an evidence flag. Based on volunteer observations, not laboratory tests. Not an official health advisory."
+  },
+  "servers": [{ "url": "/" }],
+  "tags": [
+    { "name": "meta", "description": "Snapshot identity, thresholds, model health" },
+    { "name": "sites", "description": "Per-site scores, history and reports" },
+    { "name": "network", "description": "Whole-canal views: one week, rainfall, river graph" },
+    { "name": "findings", "description": "Plain-language, fact-locked findings" },
+    { "name": "incidents", "description": "Linked change episodes with a likely entry point" }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["meta"],
+        "summary": "Liveness and the snapshot being served",
+        "responses": {
+          "200": {
+            "description": "A snapshot is loaded",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Health" } } }
+          },
+          "503": {
+            "description": "No snapshot is loaded yet",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HealthDown" } } }
+          }
+        }
+      }
+    },
+    "/api/v1/openapi.json": {
+      "get": {
+        "tags": ["meta"],
+        "summary": "This document",
+        "responses": { "200": { "description": "OpenAPI 3.1 document", "content": { "application/json": {} } } }
+      }
+    },
+    "/api/v1/meta": {
+      "get": {
+        "tags": ["meta"],
+        "summary": "Snapshot manifest, toggles, thresholds, model health, provenance and table glossary",
+        "responses": {
+          "200": { "$ref": "#/components/responses/Meta" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "503": { "$ref": "#/components/responses/NoSnapshot" }
+        }
+      }
+    },
+    "/api/v1/model/diagnostics": {
+      "get": {
+        "tags": ["meta"],
+        "summary": "Convergence and posterior-predictive checks per model variant",
+        "responses": {
+          "200": { "$ref": "#/components/responses/Diagnostics" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "503": { "$ref": "#/components/responses/NoSnapshot" }
+        }
+      }
+    },
+    "/api/v1/model/params": {
+      "get": {
+        "tags": ["meta"],
+        "summary": "Posterior summaries of model parameters",
+        "parameters": [{ "$ref": "#/components/parameters/Variant" }],
+        "responses": {
+          "200": { "$ref": "#/components/responses/Params" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "503": { "$ref": "#/components/responses/NoSnapshot" }
+        }
+      }
+    },
+    "/api/v1/sites": {
+      "get": {
+        "tags": ["sites"],
+        "summary": "Every site at the latest week, head to mouth",
+        "description": "p_change and alert_level follow the sensitivity toggle. status is the Stage 7 status text, written for the primary model only (null under other variants).",
+        "parameters": [{ "$ref": "#/components/parameters/Variant" }, { "$ref": "#/components/parameters/Sensitivity" }],
+        "responses": {
+          "200": { "$ref": "#/components/responses/SiteList" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "503": { "$ref": "#/components/responses/NoSnapshot" }
+        }
+      }
+    },
+    "/api/v1/sites/{siteId}": {
+      "get": {
+        "tags": ["sites"],
+        "summary": "One site: latest scores, neighbours, related findings and incidents",
+        "parameters": [
+          { "$ref": "#/components/parameters/SiteId" },
+          { "$ref": "#/components/parameters/Variant" },
+          { "$ref": "#/components/parameters/Sensitivity" }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/SiteDetail" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "503": { "$ref": "#/components/responses/NoSnapshot" }
+        }
+      }
+    },
+    "/api/v1/sites/{siteId}/timeseries": {
+      "get": {
+        "tags": ["sites"],
+        "summary": "Weekly W/H intervals, alerts and rainfall for one site",
+        "parameters": [
+          { "$ref": "#/components/parameters/SiteId" },
+          { "$ref": "#/components/parameters/Variant" },
+          { "$ref": "#/components/parameters/Sensitivity" },
+          { "$ref": "#/components/parameters/From" },
+          { "$ref": "#/components/parameters/To" }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/Timeseries" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "503": { "$ref": "#/components/responses/NoSnapshot" }
+        }
+      }
+    },
+    "/api/v1/sites/{siteId}/observations": {
+      "get": {
+        "tags": ["sites"],
+        "summary": "De-identified citizen reports for one site, newest first",
+        "parameters": [
+          { "$ref": "#/components/parameters/SiteId" },
+          { "$ref": "#/components/parameters/From" },
+          { "$ref": "#/components/parameters/To" },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 500, "default": 100 } },
+          { "$ref": "#/components/parameters/Offset" }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/Observations" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "503": { "$ref": "#/components/responses/NoSnapshot" }
+        }
+      }
+    },
+    "/api/v1/scores": {
+      "get": {
+        "tags": ["network"],
+        "summary": "Every site for one week (map / time slider)",
+        "parameters": [
+          { "$ref": "#/components/parameters/Variant" },
+          { "$ref": "#/components/parameters/Sensitivity" },
+          {
+            "name": "week",
+            "in": "query",
+            "description": "Any date inside the grid; it maps to the week (Monday) that contains it. Defaults to the latest week.",
+            "schema": { "type": "string", "format": "date" }
+          }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/WeekScores" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "503": { "$ref": "#/components/responses/NoSnapshot" }
+        }
+      }
+    },
+    "/api/v1/weeks": {
+      "get": {
+        "tags": ["network"],
+        "summary": "Weekly rainfall (identical across sites) and rain-exposed flag",
+        "parameters": [{ "$ref": "#/components/parameters/From" }, { "$ref": "#/components/parameters/To" }],
+        "responses": {
+          "200": { "$ref": "#/components/responses/Weeks" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "503": { "$ref": "#/components/responses/NoSnapshot" }
+        }
+      }
+    },
+    "/api/v1/river": {
+      "get": {
+        "tags": ["network"],
+        "summary": "River graph: sites as nodes, directed upstream -> downstream edges",
+        "responses": {
+          "200": { "$ref": "#/components/responses/River" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "503": { "$ref": "#/components/responses/NoSnapshot" }
+        }
+      }
+    },
+    "/api/v1/rain-pattern": {
+      "get": {
+        "tags": ["network"],
+        "summary": "Rain -> overflow test (from the no-rain model, so the answer is not built in)",
+        "responses": {
+          "200": { "$ref": "#/components/responses/RainPattern" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "503": { "$ref": "#/components/responses/NoSnapshot" }
+        }
+      }
+    },
+    "/api/v1/findings": {
+      "get": {
+        "tags": ["findings"],
+        "summary": "Ranked plain-language findings",
+        "description": "Written for the primary model at normal sensitivity. Every number in a finding's text appears in its facts object.",
+        "parameters": [
+          { "name": "type", "in": "query", "schema": { "type": "string", "enum": ["incident", "site_status", "rain_pattern", "coverage"] } },
+          { "name": "priority", "in": "query", "schema": { "type": "string", "enum": ["high", "medium", "low", "info"] } },
+          { "name": "recent", "in": "query", "schema": { "type": "boolean" } },
+          {
+            "name": "site",
+            "in": "query",
+            "description": "The site's status finding plus findings for incidents that affected it",
+            "schema": { "type": "string" }
+          },
+          { "name": "lang", "in": "query", "schema": { "type": "string", "default": "en" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 100 } },
+          { "$ref": "#/components/parameters/Offset" }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/FindingList" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "503": { "$ref": "#/components/responses/NoSnapshot" }
+        }
+      }
+    },
+    "/api/v1/findings/{findingId}": {
+      "get": {
+        "tags": ["findings"],
+        "summary": "One finding",
+        "parameters": [
+          {
+            "name": "findingId",
+            "in": "path",
+            "required": true,
+            "description": "e.g. incident:inc-015, site:gow-01, network:rain, network:coverage",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/FindingOne" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "503": { "$ref": "#/components/responses/NoSnapshot" }
+        }
+      }
+    },
+    "/api/v1/incidents": {
+      "get": {
+        "tags": ["incidents"],
+        "summary": "Incidents, most recent first",
+        "parameters": [
+          { "$ref": "#/components/parameters/Variant" },
+          { "name": "recent", "in": "query", "description": "Ended within the last RECENT_WEEKS grid weeks", "schema": { "type": "boolean" } },
+          { "name": "site", "in": "query", "description": "Only incidents that affected this site", "schema": { "type": "string" } },
+          { "name": "level", "in": "query", "schema": { "type": "string", "enum": ["confirmed", "possible"] } }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/IncidentList" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "503": { "$ref": "#/components/responses/NoSnapshot" }
+        }
+      }
+    },
+    "/api/v1/incidents/{incidentId}": {
+      "get": {
+        "tags": ["incidents"],
+        "summary": "One incident with its site-week alerts and its finding",
+        "parameters": [
+          { "name": "incidentId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "$ref": "#/components/parameters/Variant" }
+        ],
+        "responses": {
+          "200": { "$ref": "#/components/responses/IncidentOne" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "503": { "$ref": "#/components/responses/NoSnapshot" }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "Variant": {
+        "name": "variant",
+        "in": "query",
+        "description": "Rain-assumption toggle: M1 = primary model with rain (default), M1_norain = model without rain. Allowed values are listed in /api/v1/meta.",
+        "schema": { "type": "string", "enum": ["M1", "M1_norain"], "default": "M1" }
+      },
+      "Sensitivity": {
+        "name": "sensitivity",
+        "in": "query",
+        "description": "Detection sensitivity: size of W drop counted as a change (sensitive 5, normal 10, strict 20 index points).",
+        "schema": { "type": "string", "enum": ["sensitive", "normal", "strict"], "default": "normal" }
+      },
+      "From": { "name": "from", "in": "query", "description": "First week_start to include (default: first grid week)", "schema": { "type": "string", "format": "date" } },
+      "To": { "name": "to", "in": "query", "description": "Last week_start to include (default: latest grid week)", "schema": { "type": "string", "format": "date" } },
+      "Offset": { "name": "offset", "in": "query", "schema": { "type": "integer", "minimum": 0, "default": 0 } },
+      "SiteId": { "name": "siteId", "in": "path", "required": true, "description": "e.g. gow-01 (head) to gow-10 (mouth)", "schema": { "type": "string" } }
+    },
+    "responses": {
+      "BadRequest": { "description": "Invalid, unknown or repeated parameter", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+      "NotFound": { "description": "Unknown id or route", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+      "NoSnapshot": { "description": "No snapshot loaded yet", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+      "Meta": { "description": "Snapshot metadata", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MetaEnvelope" } } } },
+      "Diagnostics": { "description": "Diagnostics per variant", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ListEnvelope" } } } },
+      "Params": { "description": "Parameter summaries", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ListEnvelope" } } } },
+      "SiteList": {
+        "description": "Sites at the latest week",
+        "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/ListEnvelope" }, { "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/SiteLatest" } } } }] } } }
+      },
+      "SiteDetail": {
+        "description": "One site",
+        "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/Envelope" }, { "properties": { "data": { "$ref": "#/components/schemas/SiteDetail" } } }] } } }
+      },
+      "Timeseries": {
+        "description": "Weekly series",
+        "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/ListEnvelope" }, { "properties": { "site": { "$ref": "#/components/schemas/SiteRef" }, "data": { "type": "array", "items": { "$ref": "#/components/schemas/TimeseriesWeek" } } } }] } } }
+      },
+      "Observations": {
+        "description": "Reports",
+        "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/ListEnvelope" }, { "properties": { "site": { "$ref": "#/components/schemas/SiteRef" }, "total": { "type": "integer" }, "data": { "type": "array", "items": { "$ref": "#/components/schemas/Observation" } } } }] } } }
+      },
+      "WeekScores": {
+        "description": "Every site in one week",
+        "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/ListEnvelope" }, { "properties": { "week": { "$ref": "#/components/schemas/Week" }, "data": { "type": "array", "items": { "$ref": "#/components/schemas/WeekScore" } } } }] } } }
+      },
+      "Weeks": {
+        "description": "Weeks",
+        "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/ListEnvelope" }, { "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/Week" } } } }] } } }
+      },
+      "River": {
+        "description": "River graph",
+        "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/Envelope" }, { "properties": { "data": { "$ref": "#/components/schemas/River" } } }] } } }
+      },
+      "RainPattern": {
+        "description": "Rain -> overflow result",
+        "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/Envelope" }, { "properties": { "data": { "$ref": "#/components/schemas/RainPattern" } } }] } } }
+      },
+      "FindingList": {
+        "description": "Findings",
+        "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/ListEnvelope" }, { "properties": { "total": { "type": "integer" }, "data": { "type": "array", "items": { "$ref": "#/components/schemas/Finding" } } } }] } } }
+      },
+      "FindingOne": {
+        "description": "Finding",
+        "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/Envelope" }, { "properties": { "data": { "$ref": "#/components/schemas/Finding" } } }] } } }
+      },
+      "IncidentList": {
+        "description": "Incidents",
+        "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/ListEnvelope" }, { "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/Incident" } } } }] } } }
+      },
+      "IncidentOne": {
+        "description": "Incident with alerts",
+        "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/Envelope" }, { "properties": { "data": { "$ref": "#/components/schemas/IncidentDetail" } } }] } } }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": ["status", "message"],
+            "properties": { "status": { "type": "integer" }, "message": { "type": "string" }, "details": { "type": "object" } }
+          }
+        }
+      },
+      "Health": {
+        "type": "object",
+        "properties": {
+          "status": { "const": "ok" },
+          "snapshot_id": { "type": "string" },
+          "latest_week": { "type": "string", "format": "date" },
+          "loaded_at": { "type": "string", "format": "date-time" },
+          "last_reload_error": { "type": ["object", "null"] }
+        }
+      },
+      "HealthDown": {
+        "type": "object",
+        "properties": { "status": { "const": "no_snapshot" }, "error": { "type": ["string", "null"] }, "hint": { "type": "string" } }
+      },
+      "Envelope": {
+        "type": "object",
+        "required": ["snapshot", "disclaimer", "data"],
+        "properties": {
+          "snapshot": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "description": "Content address of the snapshot; also sent as the X-OAH-Snapshot header" },
+              "schema_version": { "type": "string" },
+              "latest_week": { "type": "string", "format": "date" },
+              "created_at_utc": { "type": "string" }
+            }
+          },
+          "disclaimer": { "type": "string" },
+          "params": { "type": "object", "description": "The parameters used, after defaults" },
+          "note": { "type": "string", "description": "What the toggles do and do not change for this endpoint" },
+          "data": {}
+        }
+      },
+      "ListEnvelope": {
+        "allOf": [{ "$ref": "#/components/schemas/Envelope" }, { "properties": { "count": { "type": "integer" }, "data": { "type": "array" } } }]
+      },
+      "MetaEnvelope": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Envelope" },
+          {
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "manifest": { "type": "object" },
+                  "weeks": { "type": "object", "properties": { "first": { "type": "string" }, "latest": { "type": "string" }, "count": { "type": "integer" } } },
+                  "n_sites": { "type": "integer" },
+                  "variants": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "role": { "type": "string" }, "rain_assumed": { "type": "boolean" }, "description": { "type": "string" } } } },
+                  "default_variant": { "type": "string" },
+                  "sensitivity_levels": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "delta_W": { "type": "number" } } } },
+                  "default_sensitivity": { "type": "string" },
+                  "recent_since": { "type": "string", "format": "date" },
+                  "thresholds": { "type": "object" },
+                  "model_health": { "type": "object", "additionalProperties": { "type": "boolean" } },
+                  "languages": { "type": "array", "items": { "type": "string" } },
+                  "tables": { "type": "array", "items": { "type": "object", "properties": { "name": { "type": "string" }, "comment": { "type": "string" } } } },
+                  "views": { "type": "array", "items": { "type": "string" } },
+                  "inputs": { "type": "array", "items": { "type": "object", "properties": { "label": { "type": "string" }, "path": { "type": "string" }, "sha256": { "type": "string" }, "n_rows": { "type": ["number", "null"] } } } }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "Band": {
+        "type": "object",
+        "description": "Posterior summary of a 0-100 index; q05-q95 is the 90% interval",
+        "properties": {
+          "mean": { "type": "number" }, "sd": { "type": "number" },
+          "q05": { "type": "number" }, "q25": { "type": "number" }, "q50": { "type": "number" }, "q75": { "type": "number" }, "q95": { "type": "number" }
+        }
+      },
+      "Evidence": { "type": "string", "enum": ["sufficient", "weak", "insufficient"] },
+      "AlertLevel": { "type": "string", "enum": ["confirmed", "possible", "none"] },
+      "SiteRef": { "type": "object", "properties": { "site_id": { "type": "string" }, "name": { "type": "string" } } },
+      "Exposure": {
+        "type": "object",
+        "description": "Nearest playground/school/park; data_source 'unavailable' means unknown, not none",
+        "properties": {
+          "category": { "type": "string", "enum": ["playground", "school", "park"] },
+          "nearest_poi_name": { "type": ["string", "null"] },
+          "nearest_poi_distance_m": { "type": ["number", "null"] },
+          "poi_count_within_threshold": { "type": ["integer", "null"] },
+          "is_exposure_relevant": { "type": ["boolean", "null"] },
+          "data_source": { "type": "string", "enum": ["real", "unavailable"] }
+        }
+      },
+      "SiteLatest": {
+        "type": "object",
+        "properties": {
+          "site_id": { "type": "string" }, "name": { "type": "string" }, "display_order": { "type": "integer" },
+          "lat": { "type": "number" }, "lon": { "type": "number" }, "watershed": { "type": "string" },
+          "distance_from_mouth_m": { "type": "number" }, "is_cso_outfall_adjacent": { "type": "boolean" },
+          "known_context_note": { "type": ["string", "null"] }, "exposure_weight": { "type": ["number", "null"] },
+          "week_start": { "type": "string", "format": "date" },
+          "W": { "$ref": "#/components/schemas/Band" }, "H": { "$ref": "#/components/schemas/Band" },
+          "evidence": { "$ref": "#/components/schemas/Evidence" },
+          "mixing_flag": { "type": "boolean", "description": "Bimodal posterior: treat the interval with care" },
+          "n_reports": { "type": "integer" },
+          "p_change": { "type": "number", "description": "P(W dropped by more than the sensitivity threshold)" },
+          "alert_level": { "$ref": "#/components/schemas/AlertLevel" },
+          "status": { "type": ["object", "null"], "properties": { "headline": { "type": "string" }, "body": { "type": "string" } } },
+          "exposure": { "type": "array", "items": { "$ref": "#/components/schemas/Exposure" } }
+        }
+      },
+      "SiteDetail": {
+        "allOf": [
+          { "$ref": "#/components/schemas/SiteLatest" },
+          {
+            "properties": {
+              "upstream": { "type": "array", "items": { "$ref": "#/components/schemas/Neighbour" } },
+              "downstream": { "type": "array", "items": { "$ref": "#/components/schemas/Neighbour" } },
+              "findings": { "type": "array", "items": { "$ref": "#/components/schemas/Finding" } },
+              "incidents": { "type": "array", "items": { "$ref": "#/components/schemas/Incident" } }
+            }
+          }
+        ]
+      },
+      "Neighbour": { "type": "object", "properties": { "site_id": { "type": "string" }, "name": { "type": "string" }, "distance_m": { "type": "number" } } },
+      "TimeseriesWeek": {
+        "type": "object",
+        "properties": {
+          "week_start": { "type": "string", "format": "date" },
+          "W": { "$ref": "#/components/schemas/Band" }, "H": { "$ref": "#/components/schemas/Band" },
+          "evidence": { "$ref": "#/components/schemas/Evidence" }, "mixing_flag": { "type": "boolean" }, "n_reports": { "type": "integer" },
+          "p_change": { "type": "number" }, "alert_level": { "$ref": "#/components/schemas/AlertLevel" },
+          "episode_id": { "type": ["string", "null"] },
+          "weekly_rainfall_mm": { "type": "number" }, "heavy_rain_week": { "type": "boolean" }, "rain_exposed": { "type": "boolean" }
+        }
+      },
+      "WeekScore": {
+        "type": "object",
+        "properties": {
+          "site_id": { "type": "string" }, "name": { "type": "string" }, "display_order": { "type": "integer" },
+          "lat": { "type": "number" }, "lon": { "type": "number" }, "is_cso_outfall_adjacent": { "type": "boolean" },
+          "W": { "$ref": "#/components/schemas/Band" }, "H": { "$ref": "#/components/schemas/Band" },
+          "evidence": { "$ref": "#/components/schemas/Evidence" }, "mixing_flag": { "type": "boolean" },
+          "n_reports": { "type": "integer" }, "n_informative_fields": { "type": "integer" },
+          "p_change": { "type": "number" }, "alert_level": { "$ref": "#/components/schemas/AlertLevel" }
+        }
+      },
+      "Observation": {
+        "type": "object",
+        "description": "De-identified: no observer id, raw payload or time of day",
+        "properties": {
+          "observation_id": { "type": "string" }, "observed_date": { "type": "string", "format": "date" },
+          "week_start": { "type": "string", "format": "date" },
+          "water_clarity": { "type": ["number", "null"], "description": "1 = clear, 5 = murky" },
+          "smell": { "type": ["string", "null"] }, "smell_intensity": { "type": ["number", "null"], "description": "0-3" },
+          "trash_level": { "type": ["number", "null"] }, "insect_presence": { "type": ["boolean", "null"] },
+          "insect_diversity": { "type": ["number", "null"] }, "notes": { "type": ["string", "null"] },
+          "source": { "type": "string", "enum": ["simulated", "real"] }
+        }
+      },
+      "Week": {
+        "type": "object",
+        "properties": {
+          "week_start": { "type": "string", "format": "date" }, "weekly_rainfall_mm": { "type": "number" },
+          "max_daily_rainfall_mm": { "type": "number" }, "rain_days_count": { "type": "integer" },
+          "antecedent_rainfall_mm_3wk": { "type": "number" }, "heavy_rain_week": { "type": "boolean" },
+          "weather_source": { "type": "string" }, "rain_exposed": { "type": "boolean" }
+        }
+      },
+      "River": {
+        "type": "object",
+        "properties": {
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "site_id": { "type": "string" }, "name": { "type": "string" }, "display_order": { "type": "integer" },
+                "lat": { "type": "number" }, "lon": { "type": "number" }, "distance_from_mouth_m": { "type": "number" },
+                "is_cso_outfall_adjacent": { "type": "boolean" }
+              }
+            }
+          },
+          "edges": {
+            "type": "array",
+            "items": { "type": "object", "properties": { "from_site_id": { "type": "string" }, "to_site_id": { "type": "string" }, "distance_m": { "type": "number" } } }
+          }
+        }
+      },
+      "RainPattern": {
+        "type": "object",
+        "properties": {
+          "model_variant": { "type": "string" }, "overall_verdict": { "type": "string" },
+          "delta_W": { "type": "number" }, "rain_lag_weeks": { "type": "integer" },
+          "n_rain_exposed_weeks": { "type": "integer" }, "n_rain_exposed_weeks_with_reports": { "type": "integer" },
+          "n_placebo_shifts": { "type": "integer" },
+          "corroboration": { "type": ["object", "null"], "description": "Rain coefficient from the primary model; supporting evidence only" },
+          "sewage_smell_share": { "type": "object", "properties": { "rain_weeks": { "type": ["number", "null"] }, "dry_weeks": { "type": ["number", "null"] } } },
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "grp": { "type": "string", "enum": ["pooled", "cso_adjacent", "other_sites"] },
+                "irr_median": { "type": "number", "description": "Incidence rate ratio, rain vs dry weeks" },
+                "irr_q05": { "type": "number" }, "irr_q95": { "type": "number" },
+                "p_irr_gt_1": { "type": "number" }, "placebo_p": { "type": "number" }, "verdict": { "type": "string" }
+              }
+            }
+          },
+          "finding": { "oneOf": [{ "$ref": "#/components/schemas/Finding" }, { "type": "null" }] }
+        }
+      },
+      "Finding": {
+        "type": "object",
+        "properties": {
+          "display_rank": { "type": "integer" }, "finding_id": { "type": "string" },
+          "finding_type": { "type": "string", "enum": ["incident", "site_status", "rain_pattern", "coverage"] },
+          "scope_id": { "type": "string", "description": "incident id, site id, or 'network'" },
+          "priority": { "type": "string", "enum": ["high", "medium", "low", "info"] },
+          "is_recent": { "type": "boolean" }, "confidence_label": { "type": ["string", "null"] },
+          "week_start": { "type": "string", "format": "date" }, "week_end": { "type": "string", "format": "date" },
+          "headline": { "type": "string" }, "body": { "type": "string" }, "precaution": { "type": ["string", "null"] },
+          "caveats": { "type": "array", "items": { "type": "string" } },
+          "facts": {
+            "type": "object",
+            "description": "Every number shown in the text: { key: { value, shown, source } }",
+            "additionalProperties": { "type": "object", "properties": { "value": {}, "shown": { "type": "string" }, "source": { "type": "string" } } }
+          },
+          "language": { "type": "string" }, "model_variant": { "type": "string" }
+        }
+      },
+      "Incident": {
+        "type": "object",
+        "properties": {
+          "incident_id": { "type": "string" },
+          "start_week": { "type": "string", "format": "date" }, "end_week": { "type": "string", "format": "date" },
+          "affected_site_ids": { "type": "array", "items": { "type": "string" } },
+          "n_episodes": { "type": "integer" }, "max_alert_level": { "type": "string", "enum": ["confirmed", "possible"] },
+          "top_source": { "type": ["string", "null"] }, "top_source_name": { "type": ["string", "null"] },
+          "top_source_prob": { "type": "number" },
+          "p_no_source": { "type": "number", "description": "Probability that no single monitored entry point explains it" },
+          "credible_set": { "type": "array", "items": { "type": "string" }, "description": "Smallest set of sites holding 80% of the source probability" },
+          "source_probs": { "type": "object", "additionalProperties": { "type": "number" } },
+          "source_ranking": { "type": "array", "items": { "type": "object", "properties": { "site_id": { "type": "string" }, "name": { "type": ["string", "null"] }, "prob": { "type": "number" } } } },
+          "entry_segment": { "type": ["string", "null"] },
+          "upstream_unobserved": { "type": "boolean" }, "decays_downstream": { "type": "boolean" }, "rain_week": { "type": "boolean" },
+          "peak_drop_W": { "type": "number" }, "model_variant": { "type": "string" },
+          "finding_id": { "type": ["string", "null"] }, "is_recent": { "type": "boolean" }
+        }
+      },
+      "IncidentDetail": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Incident" },
+          {
+            "properties": {
+              "alerts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "site_id": { "type": "string" }, "name": { "type": "string" }, "week_start": { "type": "string", "format": "date" },
+                    "p_change": { "type": "number" }, "drop_W_median": { "type": "number" }, "drop_W_q05": { "type": "number" },
+                    "drop_W_q95": { "type": "number" }, "rise_H_median": { "type": "number" },
+                    "alert_level": { "$ref": "#/components/schemas/AlertLevel" }, "evidence": { "$ref": "#/components/schemas/Evidence" },
+                    "mixing_flag": { "type": "boolean" }, "n_reports": { "type": "integer" }, "episode_id": { "type": ["string", "null"] }
+                  }
+                }
+              },
+              "finding": { "oneOf": [{ "$ref": "#/components/schemas/Finding" }, { "type": "null" }] }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

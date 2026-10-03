@@ -128,6 +128,45 @@ def test_consecutive_weeks_form_one_episode():
     assert eps.groupby("episode_id").size().sort_values().tolist() == [1, 3]
 
 
+def test_sensitivity_table_normal_level_matches_main_alerts():
+    e = _quiet_e()
+    e[:, 2, 10] = 2.0
+    e[:, 1, 4] = 0.5  # a ~9-point drop: counts at "sensitive" (5), not at "normal" (10)
+    d, scores = _draws(e), _scores()
+    sens = change.sensitivity_table(d, scores)
+    schema.validate_dataframe(sens, schema.AlertSensitivity, name="sensitivity")
+    assert set(sens["sensitivity"]) == set(config.SENSITIVITY_DELTAS)
+    assert len(sens) == len(config.SENSITIVITY_DELTAS) * S * T
+    normal = sens[sens.sensitivity == "normal"].reset_index(drop=True)
+    main = change.detect_changes(d, scores)
+    assert np.allclose(normal["p_change"], main["p_change"])
+    assert (normal["alert_level"] == main["alert_level"]).all()
+
+
+def test_larger_change_size_never_raises_probability():
+    e = _quiet_e()
+    e[:, 1, 4] = 0.5
+    e[:, 2, 10] = 2.0
+    wide = change.sensitivity_table(_draws(e), _scores()).pivot_table(
+        index=["site_id", "week_start"], columns="sensitivity", values="p_change")
+    assert (wide["sensitive"] >= wide["normal"]).all() and (wide["normal"] >= wide["strict"]).all()
+    assert (wide["sensitive"] > wide["normal"]).any()  # the borderline drop only shows at "sensitive"
+
+
+def test_committed_rain_toggle_outputs_are_valid():
+    from pipeline.model.bayesian_model import variant_path
+
+    paths = [variant_path(config.DETECTOR_ALERTS_PATH, "M1_norain"), variant_path(config.DETECTOR_INCIDENTS_PATH, "M1_norain"),
+             config.DETECTOR_SENSITIVITY_PATH]
+    if not all(p.exists() for p in paths):
+        pytest.skip("run Stage 6 first")
+    alerts, incidents, sens = (pd.read_parquet(p) for p in paths)
+    schema.validate_dataframe(alerts, schema.DetectorAlert, name="alerts_norain")
+    schema.validate_dataframe(incidents, schema.Incident, name="incidents_norain")
+    assert set(alerts["model_variant"]) == {"M1_norain"} and set(incidents["model_variant"]) <= {"M1_norain"}
+    assert set(sens["model_variant"]) == {"M1", "M1_norain"}
+
+
 # ----------------------------------------------------------------------------- D2
 
 

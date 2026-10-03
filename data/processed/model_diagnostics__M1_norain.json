@@ -12,7 +12,7 @@
   "passed": true,
   "failures": [],
   "model_variant": "M1_norain",
-  "runtime_s": 178.8,
+  "runtime_s": 165.5,
   "seed": 42,
   "n_reports": 713,
   "n_sites": 10,

@@ -18,8 +18,8 @@ from pipeline.model import data_prep, diagnostics
 from conftest import EVENT_SITE, EVENT_WEEKS, N_SITES, N_WEEKS, OUTLIER_SITE, OUTLIER_WEEK
 
 MODEL_DIR = Path(bm.__file__).parent
-# Stage 5 and Stage 6 both sit on the model side of the truth firewall.
-FIREWALLED_DIRS = (MODEL_DIR, MODEL_DIR.parent / "detectors")
+# Stages 5-8 all sit on the model side of the truth firewall (only benchmark may read truth).
+FIREWALLED_DIRS = tuple(MODEL_DIR.parent / d for d in ("model", "detectors", "nlg", "snapshot"))
 TINY = bm.SamplerSettings(draws=250, tune=250, chains=4, seed=1)
 
 
@@ -27,7 +27,7 @@ TINY = bm.SamplerSettings(draws=250, tune=250, chains=4, seed=1)
 
 
 def test_model_package_never_reads_ground_truth():
-    """Structural truth firewall: nothing under pipeline/model/ or pipeline/detectors/ (tests
+    """Structural truth firewall: nothing under pipeline/model/, detectors/, nlg/ or snapshot/ (tests
     aside) may reference the simulator's hidden truth."""
     forbidden = re.compile(r"GROUND_TRUTH|ground_truth|W_true|H_true|events\.parquet|contamination_event_active")
     offenders = []
@@ -53,11 +53,12 @@ def test_model_package_never_reads_ground_truth():
                 texts.append(node.name)
             elif isinstance(node, ast.Constant) and isinstance(node.value, str) and id(node) not in docstrings:
                 texts.append(node.value)
-            # The leak *guard* (schema.assert_no_ground_truth_leak) is the one allowed mention.
+            # The leak *guards* (schema.assert_no_ground_truth_leak and the column list it checks,
+            # schema.GROUND_TRUTH_ONLY_COLUMNS) are the only allowed mentions.
             offenders += [
                 f"{path.name}:{getattr(node, 'lineno', '?')}: {t}"
                 for t in texts
-                if forbidden.search(t.replace("assert_no_ground_truth_leak", ""))
+                if forbidden.search(t.replace("assert_no_ground_truth_leak", "").replace("GROUND_TRUTH_ONLY_COLUMNS", ""))
             ]
     assert not offenders, "\n".join(offenders)
 

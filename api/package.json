@@ -2,9 +2,14 @@
   "name": "oah-insight-api",
   "version": "1.0.0",
   "description": "Insight API serving the frozen OneAquaHealth DuckDB snapshot",
-  "main": "index.js",
+  "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server.js",
+    "dev": "node --watch-path=src src/server.js",
+    "test": "node --test --test-concurrency=1 \"test/*.test.js\""
+  },
+  "engines": {
+    "node": ">=22"
   },
   "keywords": [],
   "author": "",

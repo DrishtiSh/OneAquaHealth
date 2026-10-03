@@ -18,7 +18,7 @@ from pipeline.common import config, io_utils, schema
 
 # Static exposure weighting (Stage 7 consumes this; it is NOT used in the model fit).
 EXPOSURE_CATEGORY_WEIGHTS = {"playground": 1.0, "school": 0.7, "park": 0.5}
-EXPOSURE_DECAY_M = 250.0  # matches exposure.PROXIMITY_THRESHOLD_M
+EXPOSURE_DECAY_M = config.EXPOSURE_RADIUS_M
 
 
 @dataclass(frozen=True)

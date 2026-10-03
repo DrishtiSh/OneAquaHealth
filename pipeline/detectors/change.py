@@ -40,13 +40,14 @@ def _assign_episodes(alerts: pd.DataFrame, week_pos: dict) -> pd.Series:
     return ids
 
 
-def detect_changes(d: PosteriorDraws, scores: pd.DataFrame) -> pd.DataFrame:
+def detect_changes(d: PosteriorDraws, scores: pd.DataFrame, delta: float = config.DETECT_DELTA) -> pd.DataFrame:
     """One row per site/week -- see schema.DetectorAlert.
 
     `scores` is the Stage 5 score table for the same variant (evidence, mixing_flag, n_reports).
+    `delta` is the W drop that counts as a change; other values feed the sensitivity toggle.
     """
     drop_w, rise_h = excursion_effects(d)
-    p_change = (drop_w > config.DETECT_DELTA).mean(axis=0)
+    p_change = (drop_w > delta).mean(axis=0)
     q05, q50, q95 = np.quantile(drop_w, [0.05, 0.5, 0.95], axis=0)
     rise_med = np.median(rise_h, axis=0) if rise_h is not None else None
 
@@ -75,3 +76,18 @@ def detect_changes(d: PosteriorDraws, scores: pd.DataFrame) -> pd.DataFrame:
     alerts = pd.DataFrame(rows)
     alerts["episode_id"] = _assign_episodes(alerts, {w: i for i, w in enumerate(d.weeks)})
     return alerts
+
+
+def sensitivity_table(d: PosteriorDraws, scores: pd.DataFrame) -> pd.DataFrame:
+    """p_change / alert_level at every level of config.SENSITIVITY_DELTAS (dashboard toggle).
+
+    Same rules as the main alerts, only the change size differs. See schema.AlertSensitivity.
+    """
+    frames = []
+    for level, delta in config.SENSITIVITY_DELTAS.items():
+        a = detect_changes(d, scores, delta=delta)
+        frames.append(a[["site_id", "week_start", "p_change", "alert_level", "model_variant"]].assign(
+            sensitivity=level, delta=delta))
+    return pd.concat(frames, ignore_index=True)[
+        ["model_variant", "site_id", "week_start", "sensitivity", "delta", "p_change", "alert_level"]
+    ]

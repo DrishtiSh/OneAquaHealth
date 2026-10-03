@@ -6,6 +6,11 @@ Which Stage 5 variant feeds which detector:
   * D3 rain -> overflow    -> M1_norain (M1 already assumes rain matters; asking it would be
                               circular). M1's beta_rain is reported as corroboration only.
 
+Dashboard toggles (precomputed here, where the posterior draws live, so the live app never
+recomputes): D1/D2 are also run on M1_norain (rain-assumption toggle), and alert probabilities
+are computed at every config.SENSITIVITY_DELTAS level (sensitivity toggle). Incidents and the
+Stage 7 findings stay at the "normal" level.
+
 Thresholds live in common/config.py and were fixed before any benchmark comparison.
 """
 
@@ -32,6 +37,7 @@ RAIN_VARIANT = "M1_norain"
 
 
 def _load_scores(variant: str) -> pd.DataFrame:
+    """Stage 5 score table for a variant (evidence, mixing_flag, n_reports)."""
     path = variant_path(config.MODEL_SCORES_PATH, variant)
     if not path.exists():
         raise FileNotFoundError(f"{path} not found -- run Stage 5 (model) first.")
@@ -56,23 +62,32 @@ def _print_summary(alerts: pd.DataFrame, incidents: pd.DataFrame, rain_result: d
     print("----------------------------------")
 
 
+def _detect_variant(d: draws.PosteriorDraws, graph, heavy_rain) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """D1 + D2 + the sensitivity toggle table for one model variant."""
+    scores = _load_scores(d.variant)
+    alerts = change.detect_changes(d, scores)
+    schema.validate_dataframe(alerts, schema.DetectorAlert, name=f"detector_alerts[{d.variant}]")
+    incidents = source.localise_incidents(d, alerts, graph, heavy_rain)
+    schema.validate_dataframe(incidents, schema.Incident, name=f"detector_incidents[{d.variant}]")
+    sensitivity = change.sensitivity_table(d, scores)
+    schema.validate_dataframe(sensitivity, schema.AlertSensitivity, name=f"detector_sensitivity[{d.variant}]")
+    return alerts, incidents, sensitivity
+
+
 def run() -> dict[str, Path]:
     primary = draws.load_draws(PRIMARY_VARIANT)
     rain_draws = draws.load_draws(RAIN_VARIANT)
-    scores = _load_scores(PRIMARY_VARIANT)
     inp = data_prep.load_inputs()
-    if inp.site_ids != primary.site_ids or inp.weeks != primary.weeks:
-        raise ValueError("Stage 5 draws are out of date with the Stage 1-2 data -- re-run Stage 5.")
+    for d in (primary, rain_draws):
+        if inp.site_ids != d.site_ids or inp.weeks != d.weeks:
+            raise ValueError(f"Stage 5 draws ({d.variant}) are out of date with the Stage 1-2 data -- re-run Stage 5.")
     graph = river_graph.load_graph()
     sites = io_utils.read_parquet(config.SITES_PATH).set_index("site_id").loc[inp.site_ids]
 
-    # D1 (M1)
-    alerts = change.detect_changes(primary, scores)
-    schema.validate_dataframe(alerts, schema.DetectorAlert, name="detector_alerts")
-
-    # D2 (M1)
-    incidents = source.localise_incidents(primary, alerts, graph, inp.heavy_rain)
-    schema.validate_dataframe(incidents, schema.Incident, name="detector_incidents")
+    # D1 + D2 for both variants: M1 drives the findings; M1_norain feeds the dashboard's
+    # rain-assumption toggle. Both also get the sensitivity toggle table.
+    results = {d.variant: _detect_variant(d, graph, inp.heavy_rain) for d in (primary, rain_draws)}
+    alerts, incidents, _ = results[PRIMARY_VARIANT]
 
     # D3 (M1_norain; M1 beta_rain as corroboration)
     rain_result = rain.analyse_rain(
@@ -84,15 +99,23 @@ def run() -> dict[str, Path]:
         corroborating=primary,
     )
 
-    io_utils.write_parquet(alerts, config.DETECTOR_ALERTS_PATH)
-    io_utils.write_parquet(incidents, config.DETECTOR_INCIDENTS_PATH)
+    for variant, (a, i, _) in results.items():
+        io_utils.write_parquet(a, variant_path(config.DETECTOR_ALERTS_PATH, variant, PRIMARY_VARIANT))
+        io_utils.write_parquet(i, variant_path(config.DETECTOR_INCIDENTS_PATH, variant, PRIMARY_VARIANT))
+    io_utils.write_parquet(
+        pd.concat([sens for _, _, sens in results.values()], ignore_index=True), config.DETECTOR_SENSITIVITY_PATH
+    )
     config.DETECTOR_RAIN_PATH.write_text(json.dumps(rain_result, indent=2, default=float))
     logger.info("Wrote %d alert rows, %d incidents, rain verdict '%s'", len(alerts), len(incidents), rain_result["verdict"])
     _print_summary(alerts, incidents, rain_result)
+    norain_levels = results[RAIN_VARIANT][0]["alert_level"].value_counts().to_dict()
+    print(f"Rain-toggle view (M1_norain): confirmed={norain_levels.get('confirmed', 0)} "
+          f"possible={norain_levels.get('possible', 0)} incidents={len(results[RAIN_VARIANT][1])}")
 
     return {
         "detector_alerts": config.DETECTOR_ALERTS_PATH,
         "detector_incidents": config.DETECTOR_INCIDENTS_PATH,
+        "detector_sensitivity": config.DETECTOR_SENSITIVITY_PATH,
         "detector_rain": config.DETECTOR_RAIN_PATH,
     }
 

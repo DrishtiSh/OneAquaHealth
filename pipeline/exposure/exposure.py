@@ -31,7 +31,7 @@ _TAGS = {
     "school": {"amenity": "school"},
     "park": {"leisure": "park"},
 }
-PROXIMITY_THRESHOLD_M = 250.0
+PROXIMITY_THRESHOLD_M = config.EXPOSURE_RADIUS_M
 BBOX_PAD_M = 400.0
 
 

@@ -192,6 +192,20 @@ class DetectorAlert(BaseModel):
     model_variant: Literal["M0", "M1", "M1_norain"]
 
 
+class AlertSensitivity(BaseModel):
+    """Stage 6 output for the dashboard's sensitivity toggle: one row per variant x site x week x level."""
+
+    model_config = ConfigDict(frozen=True)
+
+    model_variant: Literal["M0", "M1", "M1_norain"]
+    site_id: str
+    week_start: date
+    sensitivity: Literal["sensitive", "normal", "strict"]
+    delta: float = Field(gt=0)
+    p_change: float = Field(ge=0, le=1)
+    alert_level: Literal["confirmed", "possible", "none"]
+
+
 class Incident(BaseModel):
     """Stage 6 output: linked episodes across sites, with a posterior over the entry point."""
 
@@ -213,6 +227,32 @@ class Incident(BaseModel):
     decays_downstream: Optional[bool] = None
     rain_week: bool
     peak_drop_W: float
+    model_variant: Literal["M0", "M1", "M1_norain"]
+
+
+class Finding(BaseModel):
+    """Stage 7 output: one plain-language, fact-locked finding.
+
+    Every number in `headline`/`body`/`precaution` traces to an entry in `facts_json`
+    ({name: {"value", "shown", "source"}}); pipeline/nlg/factlock.py enforces this before writing.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    finding_id: str
+    finding_type: Literal["incident", "site_status", "rain_pattern", "coverage"]
+    scope_id: str  # incident_id, site_id, or "network"
+    week_start: date
+    week_end: date
+    priority: Literal["high", "medium", "low", "info"]
+    confidence_label: Optional[str] = None
+    is_recent: bool
+    headline: str = Field(max_length=120)
+    body: str
+    precaution: Optional[str] = None
+    caveats: list[str]
+    facts_json: str
+    language: Literal["en"]
     model_variant: Literal["M0", "M1", "M1_norain"]
 
 
