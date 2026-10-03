@@ -13,6 +13,7 @@ export const NOTES = {
   incidents: "Incidents are linked at normal sensitivity.",
   findings: "Findings are written for the primary model at normal sensitivity; the rain-pattern finding comes from the no-rain model so the rain result is not built in.",
   rain: "An association in the data, not proof of cause.",
+  benchmark: "Measured on simulated data with a known answer; real-world accuracy is unknown.",
 };
 
 const EXPOSURE_ORDER = "list_position(['playground', 'school', 'park'], category)";
@@ -344,6 +345,19 @@ async function rainPattern(req, res) {
   }, { note: NOTES.rain });
 }
 
+// ----------------------------------------------------------------------------- benchmark
+
+// Stage 11's report: how the pipeline did against the simulator's known answer, misses included.
+async function benchmark(req, res) {
+  const { gen } = res.locals;
+  parseQuery(req.query, {});
+  if (!gen.hasBenchmark) {
+    throw notFound("this snapshot has no benchmark (Stage 11 only runs on simulated data with a known answer)");
+  }
+  const { report } = await gen.one("SELECT report_json FROM benchmark");
+  send(res, report, { note: NOTES.benchmark });
+}
+
 // ----------------------------------------------------------------------------- router
 
 export function insightsRouter() {
@@ -360,5 +374,6 @@ export function insightsRouter() {
   r.get("/incidents", listIncidents);
   r.get("/incidents/:incidentId", getIncident);
   r.get("/rain-pattern", rainPattern);
+  r.get("/benchmark", benchmark);
   return r;
 }

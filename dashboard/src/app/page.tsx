@@ -1,19 +1,21 @@
-import { getSites, getRiskSummaries } from "@/lib/data";
+import Link from "next/link";
+import { getOverviewFindings, getSiteData } from "@/lib/data";
+import { getScenario } from "@/lib/scenario";
+import { formatWeek } from "@/lib/format";
 import SiteMapLoader from "@/components/SiteMapLoader";
-import MockDataBanner from "@/components/MockDataBanner";
+import ApiOfflineBanner from "@/components/ApiOfflineBanner";
+import FindingCard from "@/components/FindingCard";
 import YourSites from "@/components/YourSites";
-import type { SiteRiskSummary } from "@/lib/types";
 
 export default async function OverviewPage() {
-  const sites = getSites();
-  const { data: riskSummaries, isMock } = await getRiskSummaries();
-  const riskBySiteId = Object.fromEntries(
-    riskSummaries.map((r) => [r.site_id, r])
-  ) as Record<string, SiteRiskSummary>;
-
-  const elevatedCount = riskSummaries.filter((r) => r.status === "elevated_risk").length;
-  const normalCount = riskSummaries.filter((r) => r.status === "normal").length;
-  const insufficientCount = riskSummaries.filter((r) => r.status === "insufficient_evidence").length;
+  const scenario = await getScenario();
+  const [siteData, findings] = await Promise.all([
+    getSiteData(scenario.variant, scenario.sensitivity),
+    getOverviewFindings(),
+  ]);
+  const { sites, riskBySiteId, snapshot } = siteData;
+  const statuses = Object.values(riskBySiteId).map((r) => r.status);
+  const count = (s: string) => statuses.filter((x) => x === s).length;
 
   return (
     <main className="flex flex-1 flex-col gap-6 max-w-5xl mx-auto w-full px-6 py-8">
@@ -21,18 +23,19 @@ export default async function OverviewPage() {
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">Stream health overview</h1>
         <p className="text-sm text-muted-foreground">
           Citizen stream observations, real weather and geography, turned into stream-health insight.
-          Use the sidebar to search or filter sites by status.
+          {snapshot && <> Showing the week of {formatWeek(snapshot.latest_week)}.</>} Use the sidebar to
+          search or filter sites by status.
         </p>
       </header>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard label="Monitoring sites" value={sites.length} />
-        <StatCard label="Elevated risk" value={elevatedCount} accent="text-rose-600 dark:text-rose-400" />
-        <StatCard label="Normal" value={normalCount} accent="text-emerald-600 dark:text-emerald-400" />
-        <StatCard label="Insufficient evidence" value={insufficientCount} accent="text-muted-foreground" />
+        <StatCard label="Elevated risk" value={count("elevated_risk")} accent="text-rose-600 dark:text-rose-400" />
+        <StatCard label="Normal" value={count("normal")} accent="text-emerald-600 dark:text-emerald-400" />
+        <StatCard label="Insufficient evidence" value={count("insufficient_evidence")} accent="text-muted-foreground" />
       </div>
 
-      {isMock && <MockDataBanner />}
+      {siteData.source === "fallback" && <ApiOfflineBanner />}
 
       <YourSites sites={sites} riskBySiteId={riskBySiteId} />
 
@@ -44,7 +47,47 @@ export default async function OverviewPage() {
           <SiteMapLoader sites={sites} riskBySiteId={riskBySiteId} />
         </div>
       </section>
+
+      {findings.source === "api" && (findings.top.length > 0 || findings.rainPattern) && (
+        <section className="flex flex-col gap-3">
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">Latest findings</h2>
+            <p className="text-xs text-muted-foreground">
+              Detected contamination events, most important first. Written for the primary model at
+              normal sensitivity, so the scenario toggles don&apos;t change them.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {findings.top.map((f) => (
+              <FindingLink key={f.finding_id} siteId={siteForFinding(f.facts)}>
+                <FindingCard finding={f} compact />
+              </FindingLink>
+            ))}
+          </div>
+          {findings.rainPattern && (
+            <div>
+              <h2 className="text-sm font-semibold text-foreground mb-2">Rain and overflow pattern</h2>
+              <FindingCard finding={findings.rainPattern} />
+            </div>
+          )}
+        </section>
+      )}
     </main>
+  );
+}
+
+// Incident findings name their top source site in facts.top_source (value = site id).
+function siteForFinding(facts: Record<string, { value: unknown }>): string | null {
+  const v = facts.top_source?.value ?? facts.site0?.value;
+  return typeof v === "string" ? v : null;
+}
+
+function FindingLink({ siteId, children }: { siteId: string | null; children: React.ReactNode }) {
+  if (!siteId) return <>{children}</>;
+  return (
+    <Link href={`/site/${siteId}`} className="block rounded-lg hover:ring-2 hover:ring-accent/40 transition-shadow">
+      {children}
+    </Link>
   );
 }
 

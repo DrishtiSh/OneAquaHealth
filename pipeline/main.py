@@ -1,6 +1,10 @@
 """Orchestrates the offline pipeline end to end: ingestion -> weather -> graph ->
-exposure -> model -> detectors -> nlg -> freeze_snapshot (stages 1-8)."""
+exposure -> model -> detectors -> nlg -> benchmark -> freeze_snapshot (stages 1-8 and 11).
 
+The benchmark (Stage 11) runs before the freeze so the snapshot can carry its report; it only
+reads the outputs of Stages 1-7 and never feeds back into them."""
+
+from pipeline.benchmark import benchmark
 from pipeline.detectors import detectors
 from pipeline.exposure import exposure
 from pipeline.graph import river_graph
@@ -26,6 +30,8 @@ def run():
     detectors.run()
     print("Stage 7: plain-language findings")
     summarize.run()
+    print("Stage 11: benchmark vs the simulator's ground truth")
+    benchmark.run()
     print("Stage 8: freeze snapshot")
     freeze_snapshot.run()
 

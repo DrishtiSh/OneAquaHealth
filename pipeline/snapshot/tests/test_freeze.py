@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import json
 
 import duckdb
 import pytest
@@ -39,7 +40,8 @@ def _tables(raw):
 def test_all_tables_and_views_exist_with_expected_rows(frozen):
     result, con = frozen
     tables = {r[0] for r in con.execute("SELECT table_name FROM duckdb_tables()").fetchall()}
-    assert set(fz.TABLE_COMMENTS) == tables
+    optional = set() if "benchmark" in fz.input_files() else {"benchmark"}
+    assert set(fz.TABLE_COMMENTS) - optional == tables
     views = {r[0] for r in con.execute("SELECT view_name FROM duckdb_views() WHERE NOT internal").fetchall()}
     assert set(fz.VIEWS) <= views
     n_sites, n_weeks = result["row_counts"]["sites"], result["row_counts"]["weeks"]
@@ -87,6 +89,40 @@ def test_snapshot_id_is_content_addressed(raw):
     assert fz.snapshot_id(raw) == fz.snapshot_id(raw)
     changed = fz.RawInputs(raw.frames, raw.json_docs, {**raw.hashes, "findings": "0" * 64}, raw.paths)
     assert fz.snapshot_id(changed) != fz.snapshot_id(raw)
+
+
+# ----------------------------------------------------------------------------- benchmark (optional)
+
+needs_benchmark = pytest.mark.skipif(not config.BENCHMARK_REPORT_PATH.exists(), reason="Stage 11 report not built")
+
+
+@needs_benchmark
+def test_benchmark_table_carries_the_report(frozen, raw):
+    _, con = frozen
+    row = con.execute("SELECT n_true_events, n_false_alarms, report_json FROM benchmark").fetchone()
+    report = json.loads(row[2])
+    assert report == raw.json_docs["benchmark"]
+    assert (row[0], row[1]) == (report["headline"]["n_true_events"], report["headline"]["n_false_alarms"])
+
+
+def test_snapshot_without_benchmark_has_no_benchmark_table(raw, tmp_path):
+    files = {k: v for k, v in fz.input_files().items() if k != "benchmark"}
+    out = tmp_path / "snap.duckdb"
+    fz.freeze(output_path=out, files=files)
+    con = duckdb.connect(str(out), read_only=True)
+    try:
+        tables = {r[0] for r in con.execute("SELECT table_name FROM duckdb_tables()").fetchall()}
+    finally:
+        con.close()
+    assert "benchmark" not in tables and "scores" in tables
+
+
+@needs_benchmark
+def test_verify_rejects_a_stale_benchmark(raw):
+    r = fz.RawInputs(raw.frames, copy.deepcopy(raw.json_docs), raw.hashes, raw.paths)
+    r.json_docs["benchmark"]["data"]["latest_week"] = "2000-01-03"
+    with pytest.raises(fz.SnapshotError, match="out of date"):
+        fz.verify_tables(_tables(r), r)
 
 
 # ----------------------------------------------------------------------------- privacy & firewall

@@ -14,6 +14,11 @@
   --muted-foreground: #64748b; /* slate-500 */
   --accent: #0d9488; /* teal-600 */
   --accent-foreground: #ffffff;
+  /* Chart series (validated with the dataviz palette checker against --surface) */
+  --series-w: #2a78d6; /* water quality */
+  --series-h: #eb6834; /* health risk */
+  --alert-confirmed: #e11d48;
+  --alert-possible: #d97706;
 }
 
 .dark {
@@ -25,6 +30,10 @@
   --muted-foreground: #94a3b8; /* slate-400 */
   --accent: #2dd4bf; /* teal-400, better contrast on dark */
   --accent-foreground: #0f172a;
+  --series-w: #3987e5;
+  --series-h: #d95926;
+  --alert-confirmed: #fb7185;
+  --alert-possible: #fbbf24;
 }
 
 @theme inline {

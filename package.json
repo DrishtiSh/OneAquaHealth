@@ -1,0 +1,21 @@
+{
+  "name": "oneaquahealth",
+  "private": true,
+  "description": "Runs the OneAquaHealth Insight API (api/) and dashboard (dashboard/) together",
+  "scripts": {
+    "setup": "npm install && npm --prefix api install && npm --prefix dashboard install",
+    "snapshot": "node scripts/py.mjs -m pipeline.snapshot.freeze_snapshot",
+    "dev": "concurrently -k -n api,web -c cyan,green \"npm --prefix api run dev\" \"npm --prefix dashboard run dev\"",
+    "start": "concurrently -k -n api,web -c cyan,green \"npm --prefix api start\" \"npm --prefix dashboard start\"",
+    "build": "npm --prefix dashboard run build",
+    "test": "npm --prefix api test",
+    "benchmark": "node scripts/py.mjs -m pipeline.benchmark.benchmark",
+    "oah-check": "node scripts/py.mjs -m pipeline.ingestion.oah_probe"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.4"
+  }
+}

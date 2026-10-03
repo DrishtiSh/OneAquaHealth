@@ -71,6 +71,9 @@ def input_files() -> dict[str, Path]:
         files[f"diagnostics__{v}"] = variant_path(config.MODEL_DIAG_PATH, v)
         files[f"alerts__{v}"] = variant_path(config.DETECTOR_ALERTS_PATH, v)
         files[f"incidents__{v}"] = variant_path(config.DETECTOR_INCIDENTS_PATH, v)
+    # Optional: Stage 11's report exists only when there was simulator ground truth to score against.
+    if config.BENCHMARK_REPORT_PATH.exists():
+        files["benchmark"] = config.BENCHMARK_REPORT_PATH
     return files
 
 
@@ -185,6 +188,13 @@ def verify_tables(tables: dict[str, pd.DataFrame], raw: RawInputs) -> None:
     if levels:
         problems.append(f"alert_sensitivity lacks levels {sorted(levels)}")
 
+    # A benchmark report must describe these very results, not an earlier run.
+    if "benchmark" in tables:
+        b = raw.json_docs["benchmark"]["data"]
+        if (b["first_week"], b["latest_week"], b["n_sites"]) != (str(min(grid)), str(max(grid)), len(sites)):
+            problems.append("benchmark_report.json is out of date with these results -- re-run Stage 11 "
+                            "(python -m pipeline.benchmark.benchmark)")
+
     # Unique keys.
     keys = {
         "sites": ["site_id"], "weeks": ["week_start"], "site_exposure": ["site_id", "category"],
@@ -238,6 +248,16 @@ def _rain_table(rain: dict) -> pd.DataFrame:
     return pd.DataFrame([{"grp": g, **rain[g], **shared} for g in ("pooled", "cso_adjacent", "other_sites")])
 
 
+def _benchmark_table(report: dict) -> pd.DataFrame:
+    """One row: Stage 11's headline numbers as columns, the full report as JSON."""
+    return pd.DataFrame([{
+        "data_source": report["data"]["source"],
+        "random_seed": report["data"]["seed"],
+        **report["headline"],
+        "report_json": json.dumps(report, sort_keys=True),
+    }])
+
+
 def _diagnostics_table(docs: dict[str, dict]) -> pd.DataFrame:
     rows = []
     for v in VARIANTS:
@@ -279,6 +299,8 @@ def build_tables(raw: RawInputs) -> dict[str, pd.DataFrame]:
         "model_diagnostics": _diagnostics_table(raw.json_docs),
         "observations": _deidentify(f["observations"]),
     }
+    if "benchmark" in raw.json_docs:
+        tables["benchmark"] = _benchmark_table(raw.json_docs["benchmark"])
     return tables
 
 
@@ -352,6 +374,8 @@ TABLE_COMMENTS = {
     "model_params": "Posterior summaries of model parameters, per variant.",
     "model_diagnostics": "Convergence and posterior-predictive checks, per variant; a snapshot is only frozen if both passed.",
     "observations": "De-identified citizen reports: no observer id, raw payload or time of day. water_clarity: 1=clear, 5=murky.",
+    "benchmark": "Stage 11 evaluation against the simulator's ground truth (simulated data only): headline accuracy plus "
+                 "report_json with every true event, miss and false alarm. Truth-derived; never fed back into any result.",
 }
 
 VIEWS = {

@@ -2,8 +2,18 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
 import UserMenu from "@/components/UserMenu";
+import ScenarioToggles from "@/components/ScenarioToggles";
+import type { Scenario, ScenarioOptions } from "@/lib/types";
 
-export default function AppHeader({ onMenuClick }: { onMenuClick: () => void }) {
+export default function AppHeader({
+  onMenuClick,
+  scenario,
+  scenarioOptions,
+}: {
+  onMenuClick: () => void;
+  scenario: Scenario;
+  scenarioOptions: ScenarioOptions;
+}) {
   return (
     <header className="sticky top-0 z-10 border-b border-border-color bg-surface-muted/90 backdrop-blur">
       <div className="flex items-center justify-between px-4 sm:px-6 py-3">
@@ -26,7 +36,16 @@ export default function AppHeader({ onMenuClick }: { onMenuClick: () => void }) 
             </div>
           </Link>
         </div>
+        <div className="hidden lg:block">
+          <ScenarioToggles scenario={scenario} options={scenarioOptions} />
+        </div>
         <div className="flex items-center gap-3">
+          <Link
+            href="/benchmark"
+            className="hidden sm:inline text-sm text-muted-foreground hover:text-accent transition-colors whitespace-nowrap"
+          >
+            How accurate?
+          </Link>
           <UserMenu />
           <ThemeToggle />
         </div>

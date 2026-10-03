@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { after, before, describe, test } from "node:test";
 import { loadGeneration, normalizeRow, SnapshotError, SnapshotStore } from "../src/db/snapshot.js";
-import { editedCopy, quietLogger, SKIP, startServer, tempDir, waitFor } from "./helpers.js";
+import { editedCopy, quietLogger, SKIP, startServer, startWithSnapshot, tempDir, waitFor } from "./helpers.js";
 
 describe("normalizeRow", () => {
   test("dates, BigInt, nested values and *_json columns", () => {
@@ -111,7 +111,21 @@ describe("snapshot store", { skip: SKIP }, () => {
   };
 
   test("an unsupported schema version is refused", () =>
-    rejects("schema.duckdb", ["UPDATE snapshot_manifest SET value = '2' WHERE key = 'schema_version'"], /schema version 2 is not supported/));
+    rejects("schema.duckdb", ["UPDATE snapshot_manifest SET value = '99' WHERE key = 'schema_version'"], /schema version 99 is not supported/));
+
+  test("the benchmark table is optional: a real-data snapshot loads and /benchmark is a 404", async () => {
+    const file = await editedCopy(fresh("nobench.duckdb"), ["DROP TABLE IF EXISTS benchmark"]);
+    const api = await startWithSnapshot(file);
+    try {
+      assert.equal(api.store.current.hasBenchmark, false);
+      const res = await api.get("/api/v1/benchmark");
+      assert.equal(res.status, 404);
+      assert.match(res.body.error.message, /no benchmark/);
+      assert.equal((await api.get("/api/v1/sites")).status, 200);
+    } finally {
+      await api.close();
+    }
+  });
 
   test("a model that failed its convergence gate is refused", () =>
     rejects("gate.duckdb", ["UPDATE snapshot_manifest SET value = 'false' WHERE key = 'diagnostics_passed__M1_norain'"], /M1_norain did not pass/));

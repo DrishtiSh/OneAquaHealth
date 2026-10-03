@@ -1,13 +1,27 @@
 """Adapter for a real OAH API / FHIR-records data source.
 
-No such API is publicly documented or reachable today -- the README's "pull
-real observations from the OAH API/FHIR records" is the project's stated
-intent for a future/real deployment, not something this hackathon build can
-call. This module documents the hypothetical contract precisely and is
-designed to be pluggable: if a real endpoint ever exists, only this file
-needs to change.
+What actually exists (checked 2026-10-03; re-check any time with `npm run oah-check`,
+i.e. `python -m pipeline.ingestion.oah_probe`):
 
-Hypothetical contract (not a real, deployed API):
+  * OAH data API, base https://api.enora-oah.eu/api (the service behind the OAH Resilience Map).
+    - Public, no key: /cities/all (5 EU cities), /sites/all (106 research sites),
+      /resilience-map/health-risks (one lab pathogen/fecal/ARG sample per site, mostly 2023),
+      /resilience-map/urban-parameters. None of this is repeated citizen reporting, and none of
+      it covers the Gowanus Canal sites this build simulates.
+    - Citizen checks from the OAH app live under /citizens/... and answer 401: they need
+      credentials (other hackathon teams also report they are not public).
+  * OAH FHIR sandbox (HL7 Europe, HAPI R4): https://sandbox.hl7europe.eu/oneaquahealth/fhir
+    - Public: Locations, lab chemistry / air / population-health Observations. The "survey"
+      Observations and QuestionnaireResponses there are other teams' demo uploads (meta tags
+      `demo`, `brook-citizen-check`), not genuine citizen data.
+
+So the simulator stays Stage 1's input until a citizen-API token is available (ask the OAH /
+hackathon organisers). With OAH_API_BASE_URL=https://api.enora-oah.eu/api and OAH_API_TOKEN
+set, run the probe first: it prints the real record fields, and the mapping below must be
+checked against them -- the endpoint path, pagination and field names here are still a
+best guess written before any real record was seen.
+
+Assumed contract (UNVERIFIED until a token works):
     GET {base_url}/observations?since=YYYY-MM-DD&until=YYYY-MM-DD&page=N
     Headers: Authorization: Bearer {api_token}          (if a token is set)
     Response: {"results": [<record>, ...], "next_page": N | null}

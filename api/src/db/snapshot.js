@@ -11,7 +11,7 @@ import fs from "node:fs";
 import duckdb from "duckdb";
 
 // The snapshot schema this API understands (config.SNAPSHOT_SCHEMA_VERSION in the pipeline).
-export const SUPPORTED_SCHEMA_VERSION = "1";
+export const SUPPORTED_SCHEMA_VERSION = "2";
 
 export const REQUIRED_TABLES = [
   "snapshot_manifest", "snapshot_inputs", "sites", "site_exposure", "river_edges", "weeks", "scores",
@@ -171,8 +171,11 @@ async function lookups(con, manifest) {
   const weeks = (await all(con, "SELECT week_start FROM weeks ORDER BY week_start")).map((r) => normalizeRow(r).week_start);
   const languages = (await all(con, "SELECT DISTINCT language FROM findings ORDER BY 1")).map((r) => r.language);
   const recentWeeks = manifest.thresholds.RECENT_WEEKS ?? 4;
+  // Optional (schema 2): Stage 11 only runs when there is simulator ground truth to score against.
+  const hasBenchmark = (await all(con, "SELECT 1 FROM duckdb_tables() WHERE table_name = 'benchmark'")).length > 0;
   return {
     manifest,
+    hasBenchmark,
     siteIds: new Set(sites.map((s) => s.site_id)),
     siteNames: Object.fromEntries(sites.map((s) => [s.site_id, s.name])),
     weeks,

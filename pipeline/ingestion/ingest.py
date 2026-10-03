@@ -1,8 +1,8 @@
 """Stage 1: Pull real observations from the OAH API/FHIR records, plus a simulator
 that generates synthetic ground-truth data for testing.
 
-No real OAH API exists today (see real_source.py), so this stage's primary,
-always-on output is the simulator -- it also generates the hidden ground truth
+Real OAH citizen checks need an API token we don't have yet (see real_source.py and
+`npm run oah-check`), so this stage's primary, always-on output is the simulator -- it also generates the hidden ground truth
 that Stage 11 (benchmark) needs to score the pipeline against. Any real
 observations are unioned in as extra, best-effort rows purely for demo realism
 and are never fed to the benchmark.

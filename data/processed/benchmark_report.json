@@ -1,0 +1,1118 @@
+{
+  "stage": 11,
+  "data": {
+    "source": "simulated",
+    "seed": 42,
+    "n_sites": 10,
+    "n_weeks": 104,
+    "first_week": "2024-09-23",
+    "latest_week": "2026-09-14",
+    "n_reports": 713
+  },
+  "thresholds": {
+    "delta_W": 10.0,
+    "p_confirmed": 0.9,
+    "p_possible": 0.5,
+    "sensitivity_deltas": {
+      "sensitive": 5.0,
+      "normal": 10.0,
+      "strict": 20.0
+    },
+    "match_tolerance_weeks": 1
+  },
+  "caveats": [
+    "Measured on simulated data with a known answer. Real-world accuracy is unknown until the pipeline is compared with lab samples or confirmed reports.",
+    "A site-week counts as truly changed when the simulated event pulled W down by more than the detector's own threshold (10 points at normal sensitivity); smaller ripples far downstream are not counted as misses.",
+    "True drops are recomputed from the events with the simulator's decay and travel-lag rules; overlapping events add up and the clip of W at 0 is ignored.",
+    "Incidents are matched to true events when they share a site and their weeks overlap within 1 week.",
+    "Thresholds were fixed before this comparison and were not tuned against it."
+  ],
+  "headline": {
+    "n_true_events": 12,
+    "n_events_detected": 10,
+    "n_incidents": 15,
+    "n_false_alarms": 6,
+    "event_recall": 0.8333,
+    "incident_precision": 0.6,
+    "site_week_precision": 0.766,
+    "site_week_recall": 0.2951,
+    "site_week_recall_observed": 0.7826,
+    "source_top1_accuracy": 0.6,
+    "W_mae": 5.8654,
+    "W_coverage_90": 0.9106,
+    "H_coverage_90": 0.8731
+  },
+  "events": {
+    "n_true_events": 12,
+    "n_detected": 10,
+    "n_detected_confirmed": 8,
+    "event_recall": 0.8333,
+    "n_observable_events": 11,
+    "event_recall_observable": 0.9091,
+    "n_incidents": 15,
+    "n_false_alarms": 6,
+    "incident_precision": 0.6,
+    "events": [
+      {
+        "event_id": "69616db3",
+        "event_type": "urban_runoff",
+        "source_site_id": "gow-07",
+        "start_week": "2025-03-03",
+        "end_week": "2025-03-03",
+        "rain_triggered": true,
+        "peak_drop_W": 79.9356,
+        "footprint_site_weeks": 4,
+        "reports_in_footprint": 0,
+        "max_p_change": 0.248,
+        "outcome": "missed",
+        "miss_reason": "no citizen reports while the drop was large enough to detect",
+        "matched_incidents": []
+      },
+      {
+        "event_id": "626db59d",
+        "event_type": "sewage_overflow",
+        "source_site_id": "gow-06",
+        "start_week": "2025-03-17",
+        "end_week": "2025-03-31",
+        "rain_triggered": true,
+        "peak_drop_W": 74.6857,
+        "footprint_site_weeks": 15,
+        "reports_in_footprint": 14,
+        "max_p_change": 1.0,
+        "outcome": "detected",
+        "miss_reason": null,
+        "matched_incidents": [
+          "inc-002"
+        ],
+        "found_source": "gow-01",
+        "source_correct": false
+      },
+      {
+        "event_id": "4ead77a2",
+        "event_type": "sewage_overflow",
+        "source_site_id": "gow-01",
+        "start_week": "2025-03-31",
+        "end_week": "2025-04-07",
+        "rain_triggered": true,
+        "peak_drop_W": 63.9142,
+        "footprint_site_weeks": 14,
+        "reports_in_footprint": 6,
+        "max_p_change": 1.0,
+        "outcome": "detected",
+        "miss_reason": null,
+        "matched_incidents": [
+          "inc-003",
+          "inc-002"
+        ],
+        "found_source": "gow-01",
+        "source_correct": true
+      },
+      {
+        "event_id": "3bd921cb",
+        "event_type": "upstream_industrial_discharge",
+        "source_site_id": "gow-09",
+        "start_week": "2025-05-05",
+        "end_week": "2025-05-05",
+        "rain_triggered": false,
+        "peak_drop_W": 70.9497,
+        "footprint_site_weeks": 2,
+        "reports_in_footprint": 2,
+        "max_p_change": 1.0,
+        "outcome": "detected",
+        "miss_reason": null,
+        "matched_incidents": [
+          "inc-005"
+        ],
+        "found_source": "gow-09",
+        "source_correct": true
+      },
+      {
+        "event_id": "35e84028",
+        "event_type": "upstream_industrial_discharge",
+        "source_site_id": "gow-04",
+        "start_week": "2025-07-14",
+        "end_week": "2025-07-14",
+        "rain_triggered": false,
+        "peak_drop_W": 41.3683,
+        "footprint_site_weeks": 6,
+        "reports_in_footprint": 5,
+        "max_p_change": 0.93,
+        "outcome": "detected",
+        "miss_reason": null,
+        "matched_incidents": [
+          "inc-008"
+        ],
+        "found_source": "gow-05",
+        "source_correct": false
+      },
+      {
+        "event_id": "1a6da2e6",
+        "event_type": "sewage_overflow",
+        "source_site_id": "gow-02",
+        "start_week": "2025-07-14",
+        "end_week": "2025-07-14",
+        "rain_triggered": true,
+        "peak_drop_W": 70.1888,
+        "footprint_site_weeks": 8,
+        "reports_in_footprint": 2,
+        "max_p_change": 0.776,
+        "outcome": "detected",
+        "miss_reason": null,
+        "matched_incidents": [
+          "inc-008"
+        ],
+        "found_source": "gow-05",
+        "source_correct": false
+      },
+      {
+        "event_id": "68790d3d",
+        "event_type": "background_noise_spike",
+        "source_site_id": "gow-09",
+        "start_week": "2025-08-11",
+        "end_week": "2025-08-25",
+        "rain_triggered": false,
+        "peak_drop_W": 58.0033,
+        "footprint_site_weeks": 6,
+        "reports_in_footprint": 2,
+        "max_p_change": 1.0,
+        "outcome": "detected",
+        "miss_reason": null,
+        "matched_incidents": [
+          "inc-009"
+        ],
+        "found_source": "gow-10",
+        "source_correct": false
+      },
+      {
+        "event_id": "349f9b1a",
+        "event_type": "background_noise_spike",
+        "source_site_id": "gow-06",
+        "start_week": "2025-08-25",
+        "end_week": "2025-09-01",
+        "rain_triggered": false,
+        "peak_drop_W": 63.5524,
+        "footprint_site_weeks": 10,
+        "reports_in_footprint": 3,
+        "max_p_change": 0.966,
+        "outcome": "detected (possible only)",
+        "miss_reason": null,
+        "matched_incidents": [
+          "inc-010"
+        ],
+        "found_source": "gow-06",
+        "source_correct": true
+      },
+      {
+        "event_id": "65917efd",
+        "event_type": "upstream_industrial_discharge",
+        "source_site_id": "gow-05",
+        "start_week": "2025-10-20",
+        "end_week": "2025-10-20",
+        "rain_triggered": false,
+        "peak_drop_W": 33.829,
+        "footprint_site_weeks": 5,
+        "reports_in_footprint": 1,
+        "max_p_change": 0.284,
+        "outcome": "missed",
+        "miss_reason": "1 report(s), but the change probability peaked at 0.28 (< 0.5)",
+        "matched_incidents": []
+      },
+      {
+        "event_id": "33c43dfa",
+        "event_type": "background_noise_spike",
+        "source_site_id": "gow-02",
+        "start_week": "2025-10-27",
+        "end_week": "2025-11-10",
+        "rain_triggered": false,
+        "peak_drop_W": 51.2716,
+        "footprint_site_weeks": 21,
+        "reports_in_footprint": 9,
+        "max_p_change": 0.962,
+        "outcome": "detected (possible only)",
+        "miss_reason": null,
+        "matched_incidents": [
+          "inc-011"
+        ],
+        "found_source": "gow-02",
+        "source_correct": true
+      },
+      {
+        "event_id": "4b840585",
+        "event_type": "background_noise_spike",
+        "source_site_id": "gow-06",
+        "start_week": "2026-04-13",
+        "end_week": "2026-04-20",
+        "rain_triggered": false,
+        "peak_drop_W": 64.1245,
+        "footprint_site_weeks": 10,
+        "reports_in_footprint": 7,
+        "max_p_change": 1.0,
+        "outcome": "detected",
+        "miss_reason": null,
+        "matched_incidents": [
+          "inc-013"
+        ],
+        "found_source": "gow-06",
+        "source_correct": true
+      },
+      {
+        "event_id": "72ac7305",
+        "event_type": "sewage_overflow",
+        "source_site_id": "gow-01",
+        "start_week": "2026-07-27",
+        "end_week": "2026-08-10",
+        "rain_triggered": true,
+        "peak_drop_W": 69.8911,
+        "footprint_site_weeks": 24,
+        "reports_in_footprint": 22,
+        "max_p_change": 1.0,
+        "outcome": "detected",
+        "miss_reason": null,
+        "matched_incidents": [
+          "inc-015"
+        ],
+        "found_source": "gow-01",
+        "source_correct": true
+      }
+    ],
+    "false_alarms": [
+      {
+        "incident_id": "inc-001",
+        "start_week": "2024-12-16",
+        "end_week": "2024-12-23",
+        "affected_site_ids": [
+          "gow-07",
+          "gow-08"
+        ],
+        "max_alert_level": "possible",
+        "largest_true_drop_W": 0.0,
+        "what_really_happened": "nothing: no simulated event touched these sites"
+      },
+      {
+        "incident_id": "inc-004",
+        "start_week": "2025-04-28",
+        "end_week": "2025-04-28",
+        "affected_site_ids": [
+          "gow-01"
+        ],
+        "max_alert_level": "possible",
+        "largest_true_drop_W": 0.0,
+        "what_really_happened": "nothing: no simulated event touched these sites"
+      },
+      {
+        "incident_id": "inc-006",
+        "start_week": "2025-05-12",
+        "end_week": "2025-05-12",
+        "affected_site_ids": [
+          "gow-04",
+          "gow-06"
+        ],
+        "max_alert_level": "possible",
+        "largest_true_drop_W": 0.0,
+        "what_really_happened": "nothing: no simulated event touched these sites"
+      },
+      {
+        "incident_id": "inc-007",
+        "start_week": "2025-06-02",
+        "end_week": "2025-06-02",
+        "affected_site_ids": [
+          "gow-07"
+        ],
+        "max_alert_level": "possible",
+        "largest_true_drop_W": 0.0,
+        "what_really_happened": "nothing: no simulated event touched these sites"
+      },
+      {
+        "incident_id": "inc-012",
+        "start_week": "2026-01-26",
+        "end_week": "2026-01-26",
+        "affected_site_ids": [
+          "gow-02"
+        ],
+        "max_alert_level": "possible",
+        "largest_true_drop_W": 0.0,
+        "what_really_happened": "nothing: no simulated event touched these sites"
+      },
+      {
+        "incident_id": "inc-014",
+        "start_week": "2026-05-04",
+        "end_week": "2026-05-04",
+        "affected_site_ids": [
+          "gow-03"
+        ],
+        "max_alert_level": "possible",
+        "largest_true_drop_W": 0.0,
+        "what_really_happened": "nothing: no simulated event touched these sites"
+      }
+    ],
+    "source_attribution": {
+      "n_matched": 10,
+      "top1_accuracy": 0.6,
+      "credible_set_coverage": 0.9,
+      "nominal_credible_mass": 0.8,
+      "mean_prob_on_true_source": 0.5098,
+      "wrong_with_upstream_unobserved": 3,
+      "pairs": [
+        {
+          "event_id": "626db59d",
+          "incident_id": "inc-002",
+          "true_source": "gow-06",
+          "top_source": "gow-01",
+          "top_source_prob": 0.438,
+          "prob_on_true_source": 0.342,
+          "true_source_in_credible_set": true,
+          "correct": false,
+          "upstream_unobserved": false
+        },
+        {
+          "event_id": "4ead77a2",
+          "incident_id": "inc-003",
+          "true_source": "gow-01",
+          "top_source": "gow-01",
+          "top_source_prob": 1.0,
+          "prob_on_true_source": 1.0,
+          "true_source_in_credible_set": true,
+          "correct": true,
+          "upstream_unobserved": false
+        },
+        {
+          "event_id": "3bd921cb",
+          "incident_id": "inc-005",
+          "true_source": "gow-09",
+          "top_source": "gow-09",
+          "top_source_prob": 0.604,
+          "prob_on_true_source": 0.604,
+          "true_source_in_credible_set": true,
+          "correct": true,
+          "upstream_unobserved": false
+        },
+        {
+          "event_id": "35e84028",
+          "incident_id": "inc-008",
+          "true_source": "gow-04",
+          "top_source": "gow-05",
+          "top_source_prob": 0.354,
+          "prob_on_true_source": 0.196,
+          "true_source_in_credible_set": true,
+          "correct": false,
+          "upstream_unobserved": true
+        },
+        {
+          "event_id": "1a6da2e6",
+          "incident_id": "inc-008",
+          "true_source": "gow-02",
+          "top_source": "gow-05",
+          "top_source_prob": 0.354,
+          "prob_on_true_source": 0.09,
+          "true_source_in_credible_set": false,
+          "correct": false,
+          "upstream_unobserved": true
+        },
+        {
+          "event_id": "68790d3d",
+          "incident_id": "inc-009",
+          "true_source": "gow-09",
+          "top_source": "gow-10",
+          "top_source_prob": 0.594,
+          "prob_on_true_source": 0.258,
+          "true_source_in_credible_set": true,
+          "correct": false,
+          "upstream_unobserved": true
+        },
+        {
+          "event_id": "349f9b1a",
+          "incident_id": "inc-010",
+          "true_source": "gow-06",
+          "top_source": "gow-06",
+          "top_source_prob": 0.512,
+          "prob_on_true_source": 0.512,
+          "true_source_in_credible_set": true,
+          "correct": true,
+          "upstream_unobserved": true
+        },
+        {
+          "event_id": "33c43dfa",
+          "incident_id": "inc-011",
+          "true_source": "gow-02",
+          "top_source": "gow-02",
+          "top_source_prob": 0.518,
+          "prob_on_true_source": 0.518,
+          "true_source_in_credible_set": true,
+          "correct": true,
+          "upstream_unobserved": false
+        },
+        {
+          "event_id": "4b840585",
+          "incident_id": "inc-013",
+          "true_source": "gow-06",
+          "top_source": "gow-06",
+          "top_source_prob": 0.578,
+          "prob_on_true_source": 0.578,
+          "true_source_in_credible_set": true,
+          "correct": true,
+          "upstream_unobserved": false
+        },
+        {
+          "event_id": "72ac7305",
+          "incident_id": "inc-015",
+          "true_source": "gow-01",
+          "top_source": "gow-01",
+          "top_source_prob": 1.0,
+          "prob_on_true_source": 1.0,
+          "true_source_in_credible_set": true,
+          "correct": true,
+          "upstream_unobserved": false
+        }
+      ]
+    }
+  },
+  "site_week_detection": {
+    "by_variant_and_sensitivity": [
+      {
+        "model_variant": "M1",
+        "sensitivity": "normal",
+        "delta_W": 10.0,
+        "rule": "confirmed",
+        "n_truly_changed": 122,
+        "tp": 17,
+        "fp": 0,
+        "fn": 105,
+        "tn": 918,
+        "precision": 1.0,
+        "recall": 0.1393,
+        "f1": 0.2446,
+        "false_positive_rate": 0.0,
+        "recall_observed_weeks": 0.3696,
+        "recall_unobserved_weeks": 0.0,
+        "roc_auc": 0.8093,
+        "average_precision": 0.5089
+      },
+      {
+        "model_variant": "M1",
+        "sensitivity": "normal",
+        "delta_W": 10.0,
+        "rule": "confirmed_or_possible",
+        "n_truly_changed": 122,
+        "tp": 36,
+        "fp": 11,
+        "fn": 86,
+        "tn": 907,
+        "precision": 0.766,
+        "recall": 0.2951,
+        "f1": 0.426,
+        "false_positive_rate": 0.012,
+        "recall_observed_weeks": 0.7826,
+        "recall_unobserved_weeks": 0.0,
+        "roc_auc": 0.8093,
+        "average_precision": 0.5089
+      },
+      {
+        "model_variant": "M1",
+        "sensitivity": "sensitive",
+        "delta_W": 5.0,
+        "rule": "confirmed",
+        "n_truly_changed": 143,
+        "tp": 21,
+        "fp": 0,
+        "fn": 122,
+        "tn": 897,
+        "precision": 1.0,
+        "recall": 0.1469,
+        "f1": 0.2561,
+        "false_positive_rate": 0.0,
+        "recall_observed_weeks": 0.3889,
+        "recall_unobserved_weeks": 0.0,
+        "roc_auc": 0.7829,
+        "average_precision": 0.4908
+      },
+      {
+        "model_variant": "M1",
+        "sensitivity": "sensitive",
+        "delta_W": 5.0,
+        "rule": "confirmed_or_possible",
+        "n_truly_changed": 143,
+        "tp": 51,
+        "fp": 56,
+        "fn": 92,
+        "tn": 841,
+        "precision": 0.4766,
+        "recall": 0.3566,
+        "f1": 0.408,
+        "false_positive_rate": 0.0624,
+        "recall_observed_weeks": 0.7222,
+        "recall_unobserved_weeks": 0.1348,
+        "roc_auc": 0.7829,
+        "average_precision": 0.4908
+      },
+      {
+        "model_variant": "M1",
+        "sensitivity": "strict",
+        "delta_W": 20.0,
+        "rule": "confirmed",
+        "n_truly_changed": 95,
+        "tp": 14,
+        "fp": 0,
+        "fn": 81,
+        "tn": 945,
+        "precision": 1.0,
+        "recall": 0.1474,
+        "f1": 0.2569,
+        "false_positive_rate": 0.0,
+        "recall_observed_weeks": 0.3684,
+        "recall_unobserved_weeks": 0.0,
+        "roc_auc": 0.8324,
+        "average_precision": 0.5162
+      },
+      {
+        "model_variant": "M1",
+        "sensitivity": "strict",
+        "delta_W": 20.0,
+        "rule": "confirmed_or_possible",
+        "n_truly_changed": 95,
+        "tp": 29,
+        "fp": 2,
+        "fn": 66,
+        "tn": 943,
+        "precision": 0.9355,
+        "recall": 0.3053,
+        "f1": 0.4603,
+        "false_positive_rate": 0.0021,
+        "recall_observed_weeks": 0.7632,
+        "recall_unobserved_weeks": 0.0,
+        "roc_auc": 0.8324,
+        "average_precision": 0.5162
+      },
+      {
+        "model_variant": "M1_norain",
+        "sensitivity": "normal",
+        "delta_W": 10.0,
+        "rule": "confirmed",
+        "n_truly_changed": 122,
+        "tp": 17,
+        "fp": 0,
+        "fn": 105,
+        "tn": 918,
+        "precision": 1.0,
+        "recall": 0.1393,
+        "f1": 0.2446,
+        "false_positive_rate": 0.0,
+        "recall_observed_weeks": 0.3696,
+        "recall_unobserved_weeks": 0.0,
+        "roc_auc": 0.7526,
+        "average_precision": 0.442
+      },
+      {
+        "model_variant": "M1_norain",
+        "sensitivity": "normal",
+        "delta_W": 10.0,
+        "rule": "confirmed_or_possible",
+        "n_truly_changed": 122,
+        "tp": 33,
+        "fp": 5,
+        "fn": 89,
+        "tn": 913,
+        "precision": 0.8684,
+        "recall": 0.2705,
+        "f1": 0.4125,
+        "false_positive_rate": 0.0054,
+        "recall_observed_weeks": 0.7174,
+        "recall_unobserved_weeks": 0.0,
+        "roc_auc": 0.7526,
+        "average_precision": 0.442
+      },
+      {
+        "model_variant": "M1_norain",
+        "sensitivity": "sensitive",
+        "delta_W": 5.0,
+        "rule": "confirmed",
+        "n_truly_changed": 143,
+        "tp": 20,
+        "fp": 0,
+        "fn": 123,
+        "tn": 897,
+        "precision": 1.0,
+        "recall": 0.1399,
+        "f1": 0.2454,
+        "false_positive_rate": 0.0,
+        "recall_observed_weeks": 0.3704,
+        "recall_unobserved_weeks": 0.0,
+        "roc_auc": 0.7263,
+        "average_precision": 0.434
+      },
+      {
+        "model_variant": "M1_norain",
+        "sensitivity": "sensitive",
+        "delta_W": 5.0,
+        "rule": "confirmed_or_possible",
+        "n_truly_changed": 143,
+        "tp": 35,
+        "fp": 10,
+        "fn": 108,
+        "tn": 887,
+        "precision": 0.7778,
+        "recall": 0.2448,
+        "f1": 0.3723,
+        "false_positive_rate": 0.0111,
+        "recall_observed_weeks": 0.6481,
+        "recall_unobserved_weeks": 0.0,
+        "roc_auc": 0.7263,
+        "average_precision": 0.434
+      },
+      {
+        "model_variant": "M1_norain",
+        "sensitivity": "strict",
+        "delta_W": 20.0,
+        "rule": "confirmed",
+        "n_truly_changed": 95,
+        "tp": 16,
+        "fp": 0,
+        "fn": 79,
+        "tn": 945,
+        "precision": 1.0,
+        "recall": 0.1684,
+        "f1": 0.2883,
+        "false_positive_rate": 0.0,
+        "recall_observed_weeks": 0.4211,
+        "recall_unobserved_weeks": 0.0,
+        "roc_auc": 0.8161,
+        "average_precision": 0.5054
+      },
+      {
+        "model_variant": "M1_norain",
+        "sensitivity": "strict",
+        "delta_W": 20.0,
+        "rule": "confirmed_or_possible",
+        "n_truly_changed": 95,
+        "tp": 27,
+        "fp": 1,
+        "fn": 68,
+        "tn": 944,
+        "precision": 0.9643,
+        "recall": 0.2842,
+        "f1": 0.439,
+        "false_positive_rate": 0.0011,
+        "recall_observed_weeks": 0.7105,
+        "recall_unobserved_weeks": 0.0,
+        "roc_auc": 0.8161,
+        "average_precision": 0.5054
+      }
+    ],
+    "calibration": [
+      {
+        "band": "very likely",
+        "n_site_weeks": 21,
+        "n_truly_changed": 21,
+        "share_truly_changed": 1.0,
+        "mean_p_change": 0.98
+      },
+      {
+        "band": "likely",
+        "n_site_weeks": 14,
+        "n_truly_changed": 12,
+        "share_truly_changed": 0.8571,
+        "mean_p_change": 0.7869
+      },
+      {
+        "band": "possibly",
+        "n_site_weeks": 72,
+        "n_truly_changed": 15,
+        "share_truly_changed": 0.2083,
+        "mean_p_change": 0.4069
+      },
+      {
+        "band": "unlikely",
+        "n_site_weeks": 933,
+        "n_truly_changed": 74,
+        "share_truly_changed": 0.0793,
+        "mean_p_change": 0.1182
+      }
+    ],
+    "baseline": {
+      "rule": "any report with clarity >= 4, or a sewage/chemical/dead_fish smell of intensity >= 2",
+      "delta_W": 10.0,
+      "tp": 26,
+      "fp": 13,
+      "fn": 96,
+      "tn": 905,
+      "precision": 0.6667,
+      "recall": 0.2131,
+      "f1": 0.323,
+      "false_positive_rate": 0.0142,
+      "recall_observed_weeks": 0.5652
+    },
+    "n_site_weeks": 1040,
+    "n_observed_site_weeks": 441
+  },
+  "score_accuracy": {
+    "M1": {
+      "W": {
+        "all": {
+          "n": 1040,
+          "mae": 5.8654,
+          "rmse": 12.0815,
+          "bias": 2.4406,
+          "spearman": 0.3793,
+          "coverage_90": 0.9106,
+          "mean_interval_width": 29.5088
+        },
+        "evidence_sufficient": {
+          "n": 355,
+          "mae": 3.3045,
+          "rmse": 4.4165,
+          "bias": 0.5915,
+          "spearman": 0.4658,
+          "coverage_90": 0.938,
+          "mean_interval_width": 15.8433
+        },
+        "evidence_weak": {
+          "n": 77,
+          "mae": 7.1463,
+          "rmse": 13.014,
+          "bias": 0.4766,
+          "spearman": 0.7295,
+          "coverage_90": 0.9481,
+          "mean_interval_width": 35.019
+        },
+        "evidence_insufficient": {
+          "n": 608,
+          "mae": 7.1984,
+          "rmse": 14.7254,
+          "bias": 3.769,
+          "spearman": 0.262,
+          "coverage_90": 0.8898,
+          "mean_interval_width": 36.7901
+        },
+        "event_weeks": {
+          "n": 122,
+          "mae": 25.8245,
+          "rmse": 33.2182,
+          "bias": 24.558,
+          "spearman": 0.2126,
+          "coverage_90": 0.6475,
+          "mean_interval_width": 40.5056
+        },
+        "quiet_weeks": {
+          "n": 918,
+          "mae": 3.2129,
+          "rmse": 4.3261,
+          "bias": -0.4987,
+          "spearman": 0.2925,
+          "coverage_90": 0.9455,
+          "mean_interval_width": 28.0474
+        }
+      },
+      "H": {
+        "all": {
+          "n": 1040,
+          "mae": 5.3915,
+          "rmse": 11.5549,
+          "bias": -1.4265,
+          "spearman": 0.3354,
+          "coverage_90": 0.8731,
+          "mean_interval_width": 29.9629
+        },
+        "evidence_sufficient": {
+          "n": 355,
+          "mae": 2.8749,
+          "rmse": 4.037,
+          "bias": 0.4214,
+          "spearman": 0.4041,
+          "coverage_90": 0.8901,
+          "mean_interval_width": 15.1981
+        },
+        "evidence_weak": {
+          "n": 77,
+          "mae": 7.1733,
+          "rmse": 12.7507,
+          "bias": 1.5714,
+          "spearman": 0.7376,
+          "coverage_90": 0.9091,
+          "mean_interval_width": 35.5136
+        },
+        "evidence_insufficient": {
+          "n": 608,
+          "mae": 6.6351,
+          "rmse": 14.0811,
+          "bias": -2.8851,
+          "spearman": 0.2217,
+          "coverage_90": 0.8586,
+          "mean_interval_width": 37.8808
+        },
+        "event_weeks": {
+          "n": 122,
+          "mae": 24.4379,
+          "rmse": 31.7633,
+          "bias": -22.2609,
+          "spearman": 0.2316,
+          "coverage_90": 0.6803,
+          "mean_interval_width": 41.651
+        },
+        "quiet_weeks": {
+          "n": 918,
+          "mae": 2.8602,
+          "rmse": 4.1448,
+          "bias": 1.3424,
+          "spearman": 0.2181,
+          "coverage_90": 0.8987,
+          "mean_interval_width": 28.4096
+        }
+      }
+    },
+    "M1_norain": {
+      "W": {
+        "all": {
+          "n": 1040,
+          "mae": 5.8151,
+          "rmse": 12.2047,
+          "bias": 2.492,
+          "spearman": 0.3907,
+          "coverage_90": 0.9269,
+          "mean_interval_width": 31.622
+        },
+        "evidence_sufficient": {
+          "n": 357,
+          "mae": 3.2566,
+          "rmse": 4.3257,
+          "bias": 0.526,
+          "spearman": 0.4926,
+          "coverage_90": 0.9552,
+          "mean_interval_width": 16.8848
+        },
+        "evidence_weak": {
+          "n": 75,
+          "mae": 7.62,
+          "rmse": 13.8793,
+          "bias": 0.9732,
+          "spearman": 0.7265,
+          "coverage_90": 0.92,
+          "mean_interval_width": 36.9041
+        },
+        "evidence_insufficient": {
+          "n": 608,
+          "mae": 7.0947,
+          "rmse": 14.8338,
+          "bias": 3.8336,
+          "spearman": 0.2689,
+          "coverage_90": 0.9112,
+          "mean_interval_width": 39.6237
+        },
+        "event_weeks": {
+          "n": 122,
+          "mae": 26.3865,
+          "rmse": 33.6363,
+          "bias": 25.1294,
+          "spearman": 0.2528,
+          "coverage_90": 0.6148,
+          "mean_interval_width": 39.7832
+        },
+        "quiet_weeks": {
+          "n": 918,
+          "mae": 3.0812,
+          "rmse": 4.2883,
+          "bias": -0.5165,
+          "spearman": 0.3574,
+          "coverage_90": 0.9684,
+          "mean_interval_width": 30.5374
+        }
+      },
+      "H": {
+        "all": {
+          "n": 1040,
+          "mae": 5.3024,
+          "rmse": 11.6711,
+          "bias": -1.4095,
+          "spearman": 0.3546,
+          "coverage_90": 0.901,
+          "mean_interval_width": 32.2865
+        },
+        "evidence_sufficient": {
+          "n": 357,
+          "mae": 2.7872,
+          "rmse": 3.934,
+          "bias": 0.5812,
+          "spearman": 0.4558,
+          "coverage_90": 0.9328,
+          "mean_interval_width": 16.0746
+        },
+        "evidence_weak": {
+          "n": 75,
+          "mae": 7.4756,
+          "rmse": 13.5521,
+          "bias": 1.1268,
+          "spearman": 0.7488,
+          "coverage_90": 0.9067,
+          "mean_interval_width": 37.4959
+        },
+        "evidence_insufficient": {
+          "n": 608,
+          "mae": 6.5113,
+          "rmse": 14.1865,
+          "bias": -2.8913,
+          "spearman": 0.219,
+          "coverage_90": 0.8816,
+          "mean_interval_width": 41.163
+        },
+        "event_weeks": {
+          "n": 122,
+          "mae": 25.0374,
+          "rmse": 32.1852,
+          "bias": -22.8666,
+          "spearman": 0.256,
+          "coverage_90": 0.7213,
+          "mean_interval_width": 40.8996
+        },
+        "quiet_weeks": {
+          "n": 918,
+          "mae": 2.6797,
+          "rmse": 4.0805,
+          "bias": 1.4421,
+          "spearman": 0.2872,
+          "coverage_90": 0.9248,
+          "mean_interval_width": 31.1418
+        }
+      }
+    }
+  },
+  "rain_pattern": {
+    "model_variant": "M1_norain",
+    "groups": [
+      {
+        "group": "pooled",
+        "true_irr_observed_weeks": 5.8218,
+        "true_irr_all_weeks": 3.8065,
+        "estimated_irr_median": 2.2639,
+        "estimated_irr_q05": 1.6893,
+        "estimated_irr_q95": 3.2631,
+        "interval_contains_truth": false,
+        "verdict": "supported",
+        "pattern_really_present": true,
+        "verdict_judged": "correct"
+      },
+      {
+        "group": "cso_adjacent",
+        "true_irr_observed_weeks": 7.0599,
+        "true_irr_all_weeks": 4.4975,
+        "estimated_irr_median": 2.8022,
+        "estimated_irr_q05": 1.8793,
+        "estimated_irr_q95": 4.3738,
+        "interval_contains_truth": false,
+        "verdict": "supported",
+        "pattern_really_present": true,
+        "verdict_judged": "correct"
+      },
+      {
+        "group": "other_sites",
+        "true_irr_observed_weeks": 4.4356,
+        "true_irr_all_weeks": 3.3548,
+        "estimated_irr_median": 1.8462,
+        "estimated_irr_q05": 1.2033,
+        "estimated_irr_q95": 2.9031,
+        "interval_contains_truth": false,
+        "verdict": "inconclusive",
+        "pattern_really_present": true,
+        "verdict_judged": "no claim (inconclusive)"
+      }
+    ],
+    "share_of_events_rain_triggered": 0.4167,
+    "n_events": 12
+  },
+  "latest_week": {
+    "week_start": "2026-09-14",
+    "sites": [
+      {
+        "site_id": "gow-01",
+        "status_shown": "normal",
+        "true_drop_W": 0.0,
+        "W_true": 81.9004,
+        "W_estimate": 82.3179,
+        "really_changed": false,
+        "judged": "correct"
+      },
+      {
+        "site_id": "gow-02",
+        "status_shown": "insufficient_evidence",
+        "true_drop_W": 0.0,
+        "W_true": 86.9063,
+        "W_estimate": 79.9964,
+        "really_changed": false,
+        "judged": "honest gap (no claim made)"
+      },
+      {
+        "site_id": "gow-03",
+        "status_shown": "normal",
+        "true_drop_W": 0.0,
+        "W_true": 85.9114,
+        "W_estimate": 83.7823,
+        "really_changed": false,
+        "judged": "correct"
+      },
+      {
+        "site_id": "gow-04",
+        "status_shown": "normal",
+        "true_drop_W": 0.0,
+        "W_true": 86.2626,
+        "W_estimate": 81.5682,
+        "really_changed": false,
+        "judged": "correct"
+      },
+      {
+        "site_id": "gow-05",
+        "status_shown": "normal",
+        "true_drop_W": 0.0,
+        "W_true": 81.6147,
+        "W_estimate": 79.4932,
+        "really_changed": false,
+        "judged": "correct"
+      },
+      {
+        "site_id": "gow-06",
+        "status_shown": "insufficient_evidence",
+        "true_drop_W": 0.0,
+        "W_true": 79.8008,
+        "W_estimate": 80.6211,
+        "really_changed": false,
+        "judged": "honest gap (no claim made)"
+      },
+      {
+        "site_id": "gow-07",
+        "status_shown": "insufficient_evidence",
+        "true_drop_W": 0.0,
+        "W_true": 83.4955,
+        "W_estimate": 80.1195,
+        "really_changed": false,
+        "judged": "honest gap (no claim made)"
+      },
+      {
+        "site_id": "gow-08",
+        "status_shown": "insufficient_evidence",
+        "true_drop_W": 0.0,
+        "W_true": 79.1638,
+        "W_estimate": 78.8723,
+        "really_changed": false,
+        "judged": "honest gap (no claim made)"
+      },
+      {
+        "site_id": "gow-09",
+        "status_shown": "normal",
+        "true_drop_W": 0.0,
+        "W_true": 85.5383,
+        "W_estimate": 80.7927,
+        "really_changed": false,
+        "judged": "correct"
+      },
+      {
+        "site_id": "gow-10",
+        "status_shown": "normal",
+        "true_drop_W": 0.0,
+        "W_true": 83.7698,
+        "W_estimate": 80.1782,
+        "really_changed": false,
+        "judged": "correct"
+      }
+    ],
+    "summary": {
+      "correct": 6,
+      "honest gap (no claim made)": 4
+    }
+  }
+}

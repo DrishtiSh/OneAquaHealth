@@ -85,6 +85,8 @@ disease-vector exposure), without pretending to be a validated scientific instru
   `rain_pattern`, `findings`, `model_params`, `model_diagnostics`, `observations` (de-identified:
   no observer id, raw payload or time of day). Views for the API: `v_site_latest`,
   `v_site_timeseries`, `v_findings_ranked`, `v_incidents`. Every table carries a DuckDB comment.
+  Schema 2 adds an optional one-row `benchmark` table (Stage 11's report; only when there was
+  simulator ground truth to score against). The freeze refuses a report from an earlier run.
 - Dashboard toggles are precomputed in Stage 6: rain assumption on/off (`model_variant` M1 vs
   M1_norain in `scores`/`alerts`/`incidents`) and detection sensitivity (`alert_sensitivity`:
   sensitive 5 / normal 10 / strict 20 index points). Incidents use the normal level, and the
@@ -134,10 +136,11 @@ disease-vector exposure), without pretending to be a validated scientific instru
 | `/incidents`, `/incidents/{id}` | incidents with source probabilities and a ranking; detail adds their site-week alerts and finding |
 | `/rain-pattern` | rain -> overflow test by group, placebo, sewage-smell shares, corroboration |
 | `/model/diagnostics`, `/model/params` | convergence + PPC checks, parameter summaries |
+| `/benchmark` | Stage 11 accuracy against the simulator's known answer: every event, miss and false alarm (404 for a real-data snapshot) |
 
 ## Structure
 
-- `pipeline/` — Python offline pipeline (stages 1-8, 12): ingestion, weather, graph, exposure,
+- `pipeline/` — Python offline pipeline (stages 1-8 and 11): ingestion, weather, graph, exposure,
   Bayesian model, detectors, NLG, snapshot freezing, and benchmarking.
 - `api/` — Node/Express Insight API (stage 9) serving the frozen DuckDB snapshot.
 - `dashboard/` — Next.js dashboard (stage 10).
@@ -172,6 +175,68 @@ curl "localhost:4000/api/v1/sites?variant=M1_norain&sensitivity=strict"
 ```bash
 cd dashboard
 npm install
-cp .env.example .env.local
-npm run dev
+cp .env.example .env.local   # set OAH_API_URL (default http://localhost:4000) and AUTH_SECRET (npx auth secret)
+npm run dev                  # http://localhost:3000
 ```
+
+### Run the whole system (API + dashboard)
+From the repo root:
+```bash
+npm run setup      # installs root, api/ and dashboard/ dependencies
+npm run snapshot   # Stage 8: freezes data/snapshot/oah_snapshot.duckdb (uses .venv's Python)
+npm run dev        # API on :4000 and dashboard on :3000 together (Ctrl+C stops both)
+```
+`npm test` runs the API suite. For a production-style run use `npm run build` and then `npm start`.
+`npm run benchmark` re-runs Stage 11 (then `npm run snapshot` to publish it), and
+`npm run oah-check` reports which real OAH data sources are reachable.
+
+### Stage 10 dashboard notes
+- The dashboard's Server Components call the Insight API (`OAH_API_URL`, server-side only, so
+  CORS never applies). The data layer is `dashboard/src/lib/data.ts`, and the HTTP client is
+  `dashboard/src/lib/api.ts`. Pages never compute scores; they show what the snapshot holds.
+- Site status: a confirmed or possible detected change means **Elevated risk**, `evidence =
+  insufficient` means **Insufficient evidence**, and anything else is **Normal**.
+- The scenario toggles in the header (the sidebar on small screens) set cookies and map 1:1 to the
+  API's `variant` (rain assumption on = `M1`, off = `M1_norain`) and `sensitivity`
+  (5/10/20-point drop). The written findings and incidents stay on the primary model at normal
+  sensitivity, and the page says so.
+- If the API is unreachable, every page still renders from the bundled JSON in
+  `dashboard/src/data/` (`npm run export-data` regenerates it from `data/`). It shows an
+  "Insight API not reachable" banner, and risk numbers are labelled as mock.
+- `/benchmark` ("How accurate is this?", linked from the header and footer) shows Stage 11's report.
+
+### Stage 11 benchmark notes
+- `python -m pipeline.benchmark.benchmark` (runs inside `pipeline.main` before the freeze) scores
+  the Stage 5-6 outputs against the simulator's hidden truth, the only stage allowed to read it.
+  It writes `data/processed/benchmark_report.json` and a readable `benchmark_report.md`. Thresholds
+  are the ones fixed in `config.py`; nothing is tuned against the truth.
+- A site-week counts as truly changed when the simulated event pulled W down by more than the
+  detector's own threshold. The truth is recomputed from the events with the simulator's decay
+  and lag rules, and cross-checked against the stored ground truth.
+- Current results (seed 42, 10 sites x 104 weeks):
+
+  | | |
+  |---|---|
+  | Contamination events found | **10 of 12**: one missed because nobody reported during it, one with 1 report whose change probability peaked at 0.28 |
+  | Incidents that were false alarms | **6 of 15**, all at the "possible" level; "confirmed" alerts had no false positives |
+  | Weekly alerts (normal sensitivity) | precision 77%, recall 78% on weeks with a report (30% across all weeks, since most site-weeks have no report) |
+  | Entry point | right for 60% of found events; the true source was inside the 80% shortlist 90% of the time |
+  | Scores | W off by 5.9 points on average; 90% ranges held the truth 91% (W) / 87% (H) of the time, but only 65% during events, because the model understates large drops |
+  | Probability words | "very likely" was right 21/21, "likely" 12/14, "possibly" 15/72 |
+  | Rain -> overflow | verdict right ("supported"), but the rain/dry ratio is underestimated: 2.3 estimated vs 5.8 true |
+  | No-model baseline | flagging murky/sewage reports directly: precision 67%, recall 57% on reported weeks |
+
+- These describe the method on simulated data. Real-world accuracy is unknown until results are
+  compared with lab samples or confirmed reports.
+
+### Real OAH data: status
+Checked 2026-10-03 (re-check with `npm run oah-check`; details in `pipeline/ingestion/real_source.py`):
+- **Citizen checks from the OAH app** (`https://api.enora-oah.eu/api/citizens/...`) need
+  credentials (HTTP 401). Ask the OAH / hackathon organisers for a token, set `OAH_API_TOKEN`
+  and `OAH_API_BASE_URL=https://api.enora-oah.eu/api`, then run `npm run oah-check`: it prints a
+  real record's fields so the Stage 1 adapter's mapping can be finished against them.
+- **Public, no key:** the same API's cities (5), research sites (106), one lab health-risk sample
+  per site (mostly 2023) and urban parameters; and HL7 Europe's FHIR sandbox
+  (`https://sandbox.hl7europe.eu/oneaquahealth/fhir`) with lab, air and population-health
+  Observations. Its "survey" records are other teams' demo uploads. None of this is repeated
+  citizen reporting, and none covers the Gowanus Canal, so the simulator remains Stage 1's input.

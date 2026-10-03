@@ -227,6 +227,19 @@ describe("Insight API", { skip: SKIP }, () => {
     assert.match(note, /not proof of cause/);
   });
 
+  test("benchmark: the Stage 11 report with every true event, parsed from report_json", async () => {
+    const { data, note } = await ok(`${V1}/benchmark`);
+    assert.match(note, /simulated data/);
+    assert.equal(data.data.source, "simulated");
+    const h = data.headline;
+    assert.equal(data.events.events.length, h.n_true_events);
+    assert.equal(data.events.false_alarms.length, h.n_false_alarms);
+    assert.ok(h.n_events_detected <= h.n_true_events && h.n_false_alarms <= h.n_incidents);
+    assert.ok(data.events.events.every((e) => ["detected", "detected (possible only)", "missed"].includes(e.outcome)));
+    assert.ok(data.events.events.filter((e) => e.outcome === "missed").every((e) => e.miss_reason));
+    assert.ok(data.caveats.length > 0);
+  });
+
   test("model diagnostics and params", async () => {
     const diag = await ok(`${V1}/model/diagnostics`);
     assert.ok(diag.data.every((d) => d.passed === true && Array.isArray(d.failures) && typeof d.ppc === "object"));

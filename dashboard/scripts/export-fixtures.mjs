@@ -1,13 +1,10 @@
 // Dev utility (not part of the Next.js app itself): converts the pipeline's
-// real Stage 1-4 data files (parquet) into JSON fixtures under src/data/, so
-// the dashboard can show real data while Stages 5-9 (model, detectors, NLG,
-// snapshot, API) aren't built yet. Plain JavaScript, no Python involved.
+// real Stage 1-4 data files (parquet) into JSON fixtures under src/data/.
+// The dashboard reads everything from the Insight API (Stage 9); these
+// fixtures are only its offline fallback when the API isn't reachable.
+// Plain JavaScript, no Python involved.
 //
 // Run with: npm run export-data
-//
-// Once the real Insight API (Stage 9) exists, only src/lib/data.ts's mocked
-// risk-summary path needs to change -- this script's output (sites, weather,
-// river graph, exposure) is already real, final data.
 
 import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";

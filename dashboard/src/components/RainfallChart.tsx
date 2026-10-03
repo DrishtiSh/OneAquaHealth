@@ -10,10 +10,11 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
-import type { WeatherWeek } from "@/lib/types";
+import { formatMonth } from "@/lib/format";
+import type { RainfallWeek } from "@/lib/data";
 
 interface RainfallChartProps {
-  weeks: WeatherWeek[];
+  weeks: RainfallWeek[];
 }
 
 export default function RainfallChart({ weeks }: RainfallChartProps) {
@@ -30,7 +31,8 @@ export default function RainfallChart({ weeks }: RainfallChartProps) {
         <XAxis
           dataKey="week"
           tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
-          interval={Math.ceil(chartData.length / 10)}
+          tickFormatter={formatMonth}
+          interval={Math.max(0, Math.ceil(chartData.length / 5) - 1)}
           axisLine={{ stroke: "var(--border-color)" }}
           tickLine={false}
         />

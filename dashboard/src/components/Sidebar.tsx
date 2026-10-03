@@ -4,8 +4,9 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { statusDotColor } from "@/components/StatusBadge";
+import ScenarioToggles from "@/components/ScenarioToggles";
 import { useAuth } from "@/lib/auth-context";
-import type { RiskStatus, Site, SiteRiskSummary } from "@/lib/types";
+import type { RiskStatus, Scenario, ScenarioOptions, Site, SiteRiskSummary } from "@/lib/types";
 
 type FilterValue = "all" | RiskStatus;
 
@@ -20,6 +21,8 @@ interface SidebarProps {
   sites: Site[];
   orderedSiteIds: string[];
   riskBySiteId: Record<string, SiteRiskSummary>;
+  scenario: Scenario;
+  scenarioOptions: ScenarioOptions;
   isOpenMobile: boolean;
   onClose: () => void;
 }
@@ -28,6 +31,8 @@ export default function Sidebar({
   sites,
   orderedSiteIds,
   riskBySiteId,
+  scenario,
+  scenarioOptions,
   isOpenMobile,
   onClose,
 }: SidebarProps) {
@@ -87,6 +92,11 @@ export default function Sidebar({
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-sm">
             Close
           </button>
+        </div>
+
+        {/* The header shows the toggles from lg up; below that they live here. */}
+        <div className="p-4 border-b border-border-color lg:hidden">
+          <ScenarioToggles scenario={scenario} options={scenarioOptions} stacked />
         </div>
 
         <div className="p-4 flex flex-col gap-3 border-b border-border-color">

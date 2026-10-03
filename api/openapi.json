@@ -11,7 +11,8 @@
     { "name": "sites", "description": "Per-site scores, history and reports" },
     { "name": "network", "description": "Whole-canal views: one week, rainfall, river graph" },
     { "name": "findings", "description": "Plain-language, fact-locked findings" },
-    { "name": "incidents", "description": "Linked change episodes with a likely entry point" }
+    { "name": "incidents", "description": "Linked change episodes with a likely entry point" },
+    { "name": "benchmark", "description": "Accuracy against the simulator's known answer (Stage 11)" }
   ],
   "paths": {
     "/health": {
@@ -195,6 +196,19 @@
         }
       }
     },
+    "/api/v1/benchmark": {
+      "get": {
+        "tags": ["benchmark"],
+        "summary": "How accurate the pipeline is against the simulator's ground truth, misses and false alarms included",
+        "description": "Only present when the snapshot was built from simulated data (Stage 11 needs a known answer); 404 otherwise. Thresholds were fixed before the comparison.",
+        "responses": {
+          "200": { "$ref": "#/components/responses/Benchmark" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "503": { "$ref": "#/components/responses/NoSnapshot" }
+        }
+      }
+    },
     "/api/v1/findings": {
       "get": {
         "tags": ["findings"],
@@ -335,6 +349,10 @@
       "RainPattern": {
         "description": "Rain -> overflow result",
         "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/Envelope" }, { "properties": { "data": { "$ref": "#/components/schemas/RainPattern" } } }] } } }
+      },
+      "Benchmark": {
+        "description": "Stage 11 benchmark report",
+        "content": { "application/json": { "schema": { "allOf": [{ "$ref": "#/components/schemas/Envelope" }, { "properties": { "data": { "$ref": "#/components/schemas/Benchmark" } } }] } } }
       },
       "FindingList": {
         "description": "Findings",
@@ -546,6 +564,32 @@
             "type": "array",
             "items": { "type": "object", "properties": { "from_site_id": { "type": "string" }, "to_site_id": { "type": "string" }, "distance_m": { "type": "number" } } }
           }
+        }
+      },
+      "Benchmark": {
+        "type": "object",
+        "description": "Full report from pipeline/benchmark/benchmark.py (same as data/processed/benchmark_report.json).",
+        "required": ["headline", "events", "site_week_detection", "score_accuracy", "rain_pattern", "latest_week", "caveats"],
+        "properties": {
+          "data": { "type": "object", "description": "Source (simulated), seed, sites, weeks, report count" },
+          "thresholds": { "type": "object" },
+          "caveats": { "type": "array", "items": { "type": "string" } },
+          "headline": {
+            "type": "object",
+            "properties": {
+              "n_true_events": { "type": "integer" }, "n_events_detected": { "type": "integer" },
+              "n_incidents": { "type": "integer" }, "n_false_alarms": { "type": "integer" },
+              "event_recall": { "type": ["number", "null"] }, "incident_precision": { "type": ["number", "null"] },
+              "site_week_precision": { "type": ["number", "null"] }, "site_week_recall": { "type": ["number", "null"] },
+              "site_week_recall_observed": { "type": ["number", "null"] }, "source_top1_accuracy": { "type": ["number", "null"] },
+              "W_mae": { "type": "number" }, "W_coverage_90": { "type": "number" }, "H_coverage_90": { "type": "number" }
+            }
+          },
+          "events": { "type": "object", "description": "Every true event (detected or missed, with the reason), false-alarm incidents, entry-point accuracy" },
+          "site_week_detection": { "type": "object", "description": "Precision/recall per model variant x sensitivity, calibration of the probability words, a no-model baseline" },
+          "score_accuracy": { "type": "object", "description": "MAE, bias, Spearman and 90% interval coverage of W and H, by evidence level and event vs quiet weeks" },
+          "rain_pattern": { "type": "object", "description": "True vs estimated rain/dry incidence ratio and whether each verdict was right" },
+          "latest_week": { "type": "object", "description": "The status each site shows for the latest week vs what really happened" }
         }
       },
       "RainPattern": {

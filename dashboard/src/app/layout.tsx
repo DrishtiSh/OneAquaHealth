@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import AppShell from "@/components/AppShell";
+import DataFooter from "@/components/DataFooter";
 import { AuthProvider } from "@/lib/auth-context";
-import { getSites, getOrderedSiteIds, getRiskSummaries } from "@/lib/data";
-import type { SiteRiskSummary } from "@/lib/types";
+import { getScenarioOptions, getSiteData } from "@/lib/data";
+import { getScenario } from "@/lib/scenario";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -35,17 +36,19 @@ const THEME_INIT_SCRIPT = `
 `;
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const sites = getSites();
-  const orderedSiteIds = getOrderedSiteIds();
-  const { data: riskSummaries } = await getRiskSummaries();
-  const riskBySiteId = Object.fromEntries(
-    riskSummaries.map((r) => [r.site_id, r])
-  ) as Record<string, SiteRiskSummary>;
+  const scenario = await getScenario();
+  const [siteData, scenarioOptions] = await Promise.all([
+    getSiteData(scenario.variant, scenario.sensitivity),
+    getScenarioOptions(),
+  ]);
 
   return (
+    // THEME_INIT_SCRIPT adds the "dark" class before React hydrates, so the class list is
+    // expected to differ from the server render on this one element.
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         <Script id="theme-init" strategy="beforeInteractive">
@@ -54,7 +57,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-full">
         <AuthProvider>
-          <AppShell sites={sites} orderedSiteIds={orderedSiteIds} riskBySiteId={riskBySiteId}>
+          <AppShell
+            sites={siteData.sites}
+            orderedSiteIds={siteData.orderedSiteIds}
+            riskBySiteId={siteData.riskBySiteId}
+            scenario={scenario}
+            scenarioOptions={scenarioOptions}
+            footer={<DataFooter provenance={siteData} />}
+          >
             {children}
           </AppShell>
         </AuthProvider>
