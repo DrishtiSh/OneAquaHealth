@@ -1,0 +1,102 @@
+[
+  {
+    "site_id": "gow-01",
+    "name": "Butler St Head",
+    "lat": 40.681577,
+    "lon": -73.986926,
+    "watershed": "Gowanus Canal",
+    "distance_from_mouth_m": 2930.7,
+    "is_cso_outfall_adjacent": true,
+    "known_context_note": "Head of the canal; near the 'Head End' (RH-034) CSO retention facility."
+  },
+  {
+    "site_id": "gow-02",
+    "name": "Douglass St",
+    "lat": 40.678973,
+    "lon": -73.988701,
+    "watershed": "Gowanus Canal",
+    "distance_from_mouth_m": 2605.1,
+    "is_cso_outfall_adjacent": true,
+    "known_context_note": "Near the 'Head End' (RH-034) CSO retention facility."
+  },
+  {
+    "site_id": "gow-03",
+    "name": "Degraw St",
+    "lat": 40.676319,
+    "lon": -73.990099,
+    "watershed": "Gowanus Canal",
+    "distance_from_mouth_m": 2279.4,
+    "is_cso_outfall_adjacent": false,
+    "known_context_note": null
+  },
+  {
+    "site_id": "gow-04",
+    "name": "Sackett St",
+    "lat": 40.67607,
+    "lon": -73.993401,
+    "watershed": "Gowanus Canal",
+    "distance_from_mouth_m": 1953.8,
+    "is_cso_outfall_adjacent": false,
+    "known_context_note": null
+  },
+  {
+    "site_id": "gow-05",
+    "name": "Union St",
+    "lat": 40.674395,
+    "lon": -73.996232,
+    "watershed": "Gowanus Canal",
+    "distance_from_mouth_m": 1628.2,
+    "is_cso_outfall_adjacent": false,
+    "known_context_note": "Near the Gowanus Canal Sponge Park."
+  },
+  {
+    "site_id": "gow-06",
+    "name": "Carroll St",
+    "lat": 40.671883,
+    "lon": -73.99822,
+    "watershed": "Gowanus Canal",
+    "distance_from_mouth_m": 1302.5,
+    "is_cso_outfall_adjacent": true,
+    "known_context_note": "Near the 'Owls Head' (OH-007) CSO retention facility."
+  },
+  {
+    "site_id": "gow-07",
+    "name": "3rd St",
+    "lat": 40.669197,
+    "lon": -73.999671,
+    "watershed": "Gowanus Canal",
+    "distance_from_mouth_m": 976.9,
+    "is_cso_outfall_adjacent": true,
+    "known_context_note": "Near the 'Owls Head' (OH-007) CSO retention facility."
+  },
+  {
+    "site_id": "gow-08",
+    "name": "6th/7th St",
+    "lat": 40.667212,
+    "lon": -74.002364,
+    "watershed": "Gowanus Canal",
+    "distance_from_mouth_m": 651.3,
+    "is_cso_outfall_adjacent": false,
+    "known_context_note": null
+  },
+  {
+    "site_id": "gow-09",
+    "name": "9th St",
+    "lat": 40.665938,
+    "lon": -74.005829,
+    "watershed": "Gowanus Canal",
+    "distance_from_mouth_m": 325.6,
+    "is_cso_outfall_adjacent": false,
+    "known_context_note": null
+  },
+  {
+    "site_id": "gow-10",
+    "name": "Hamilton Ave Mouth",
+    "lat": 40.664754,
+    "lon": -74.009354,
+    "watershed": "Gowanus Canal",
+    "distance_from_mouth_m": 0,
+    "is_cso_outfall_adjacent": false,
+    "known_context_note": "Mouth of the canal, discharging into Gowanus Bay."
+  }
+]

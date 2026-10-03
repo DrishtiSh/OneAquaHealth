@@ -1,0 +1,112 @@
+[
+  {
+    "site_id": "gow-01",
+    "week_start": "2026-09-07",
+    "water_quality_score": 48.2,
+    "water_quality_uncertainty": [36.0, 60.5],
+    "health_risk_score": 62.4,
+    "health_risk_uncertainty": [49.0, 74.8],
+    "status": "elevated_risk",
+    "finding": "[MOCK] Elevated contamination risk detected after recent heavy rainfall, within 230m of a playground and 104m of Thomas Greene Playground.",
+    "is_mock": true
+  },
+  {
+    "site_id": "gow-02",
+    "week_start": "2026-09-07",
+    "water_quality_score": 54.1,
+    "water_quality_uncertainty": [42.3, 65.9],
+    "health_risk_score": 55.0,
+    "health_risk_uncertainty": [41.5, 68.2],
+    "status": "elevated_risk",
+    "finding": "[MOCK] Water quality declined this week, likely propagating downstream from Butler St Head. A park (Sackett Place) sits within 74m.",
+    "is_mock": true
+  },
+  {
+    "site_id": "gow-03",
+    "week_start": "2026-09-07",
+    "water_quality_score": 78.6,
+    "water_quality_uncertainty": [70.1, 87.0],
+    "health_risk_score": 17.8,
+    "health_risk_uncertainty": [9.0, 26.5],
+    "status": "normal",
+    "finding": "[MOCK] No significant change detected. Water quality within normal range.",
+    "is_mock": true
+  },
+  {
+    "site_id": "gow-04",
+    "week_start": "2026-09-07",
+    "water_quality_score": 80.3,
+    "water_quality_uncertainty": [72.6, 88.1],
+    "health_risk_score": 14.9,
+    "health_risk_uncertainty": [7.2, 22.7],
+    "status": "normal",
+    "finding": "[MOCK] No significant change detected. Water quality within normal range.",
+    "is_mock": true
+  },
+  {
+    "site_id": "gow-05",
+    "week_start": "2026-09-07",
+    "water_quality_score": 62.0,
+    "water_quality_uncertainty": [20.0, 95.0],
+    "health_risk_score": 35.0,
+    "health_risk_uncertainty": [5.0, 80.0],
+    "status": "insufficient_evidence",
+    "finding": "[MOCK] Too few citizen reports this week to draw a reliable conclusion -- treat this estimate with caution.",
+    "is_mock": true
+  },
+  {
+    "site_id": "gow-06",
+    "week_start": "2026-09-07",
+    "water_quality_score": 50.7,
+    "water_quality_uncertainty": [38.9, 63.0],
+    "health_risk_score": 58.3,
+    "health_risk_uncertainty": [45.1, 71.0],
+    "status": "elevated_risk",
+    "finding": "[MOCK] Possible sewage overflow signature detected near the Owls Head CSO facility. Lowe's Esplanade (park) is within 137m.",
+    "is_mock": true
+  },
+  {
+    "site_id": "gow-07",
+    "week_start": "2026-09-07",
+    "water_quality_score": 65.4,
+    "water_quality_uncertainty": [54.0, 76.3],
+    "health_risk_score": 32.1,
+    "health_risk_uncertainty": [20.5, 44.0],
+    "status": "normal",
+    "finding": "[MOCK] Slightly below baseline but within normal variation. Red Hook Park is within 217m.",
+    "is_mock": true
+  },
+  {
+    "site_id": "gow-08",
+    "week_start": "2026-09-07",
+    "water_quality_score": 83.9,
+    "water_quality_uncertainty": [76.0, 91.2],
+    "health_risk_score": 10.4,
+    "health_risk_uncertainty": [4.0, 17.8],
+    "status": "normal",
+    "finding": "[MOCK] No significant change detected. Water quality within normal range.",
+    "is_mock": true
+  },
+  {
+    "site_id": "gow-09",
+    "week_start": "2026-09-07",
+    "water_quality_score": 85.2,
+    "water_quality_uncertainty": [78.0, 92.4],
+    "health_risk_score": 9.1,
+    "health_risk_uncertainty": [3.5, 15.9],
+    "status": "normal",
+    "finding": "[MOCK] No significant change detected. Water quality within normal range.",
+    "is_mock": true
+  },
+  {
+    "site_id": "gow-10",
+    "week_start": "2026-09-07",
+    "water_quality_score": 87.0,
+    "water_quality_uncertainty": [80.1, 93.5],
+    "health_risk_score": 7.6,
+    "health_risk_uncertainty": [2.8, 13.9],
+    "status": "normal",
+    "finding": "[MOCK] No significant change detected. Water quality within normal range.",
+    "is_mock": true
+  }
+]

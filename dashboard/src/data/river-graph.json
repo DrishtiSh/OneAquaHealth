@@ -1,0 +1,47 @@
+[
+  {
+    "from_site_id": "gow-01",
+    "to_site_id": "gow-02",
+    "distance_m": 325.6566295537227
+  },
+  {
+    "from_site_id": "gow-02",
+    "to_site_id": "gow-03",
+    "distance_m": 325.5991735356788
+  },
+  {
+    "from_site_id": "gow-03",
+    "to_site_id": "gow-04",
+    "distance_m": 325.61879548734123
+  },
+  {
+    "from_site_id": "gow-04",
+    "to_site_id": "gow-05",
+    "distance_m": 325.65491120939714
+  },
+  {
+    "from_site_id": "gow-05",
+    "to_site_id": "gow-06",
+    "distance_m": 325.6325520164294
+  },
+  {
+    "from_site_id": "gow-06",
+    "to_site_id": "gow-07",
+    "distance_m": 325.6104436689193
+  },
+  {
+    "from_site_id": "gow-07",
+    "to_site_id": "gow-08",
+    "distance_m": 325.68046564456677
+  },
+  {
+    "from_site_id": "gow-08",
+    "to_site_id": "gow-09",
+    "distance_m": 325.60739591990887
+  },
+  {
+    "from_site_id": "gow-09",
+    "to_site_id": "gow-10",
+    "distance_m": 325.64083421279156
+  }
+]

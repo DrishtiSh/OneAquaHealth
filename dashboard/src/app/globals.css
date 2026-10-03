@@ -1,26 +1,67 @@
 @import "tailwindcss";
 
+/* Class-based dark mode (toggled by ThemeToggle, not just OS preference) --
+   this is Tailwind v4's CSS-native replacement for the old JS
+   `darkMode: "class"` config option. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f1f5f9; /* slate-100 */
+  --foreground: #0f172a; /* slate-900 */
+  --surface: #ffffff; /* card background */
+  --surface-muted: #f8fafc; /* slate-50, sidebar/topbar */
+  --border-color: #e2e8f0; /* slate-200 */
+  --muted-foreground: #64748b; /* slate-500 */
+  --accent: #0d9488; /* teal-600 */
+  --accent-foreground: #ffffff;
+}
+
+.dark {
+  --background: #0f172a; /* slate-900 */
+  --foreground: #f1f5f9; /* slate-100 */
+  --surface: #1e293b; /* slate-800 */
+  --surface-muted: #172033; /* between slate-800/900, for topbar/sidebar depth */
+  --border-color: #334155; /* slate-700 */
+  --muted-foreground: #94a3b8; /* slate-400 */
+  --accent: #2dd4bf; /* teal-400, better contrast on dark */
+  --accent-foreground: #0f172a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border-color: var(--border-color);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Leaflet popups, restyled to match the app instead of Leaflet's defaults */
+.leaflet-popup-content-wrapper {
+  border-radius: 0.75rem;
+  background: var(--surface);
+  color: var(--foreground);
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.25);
+}
+.leaflet-popup-content {
+  margin: 0.75rem 1rem;
+}
+.leaflet-popup-tip {
+  background: var(--surface);
+}
+
+/* Free dark basemap trick: invert OSM's standard (light) tiles instead of
+   depending on a paid/keyed dark-tile provider. */
+.dark .map-tiles img.leaflet-tile {
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
 }

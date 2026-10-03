@@ -1,0 +1,272 @@
+[
+  {
+    "site_id": "gow-01",
+    "category": "playground",
+    "nearest_poi_distance_m": 228.30931921784963,
+    "nearest_poi_name": "unnamed",
+    "poi_count_within_threshold": 2,
+    "is_exposure_relevant": true,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-01",
+    "category": "school",
+    "nearest_poi_distance_m": 324.42467353796764,
+    "nearest_poi_name": "P.S. 32 - Samuel Mills Sprole School",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-01",
+    "category": "park",
+    "nearest_poi_distance_m": 103.74655996447522,
+    "nearest_poi_name": "Thomas Greene Playground",
+    "poi_count_within_threshold": 2,
+    "is_exposure_relevant": true,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-02",
+    "category": "playground",
+    "nearest_poi_distance_m": 192.34135129482945,
+    "nearest_poi_name": "unnamed",
+    "poi_count_within_threshold": 1,
+    "is_exposure_relevant": true,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-02",
+    "category": "school",
+    "nearest_poi_distance_m": 175.02090456114098,
+    "nearest_poi_name": "P.S. 32 - Samuel Mills Sprole School",
+    "poi_count_within_threshold": 2,
+    "is_exposure_relevant": true,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-02",
+    "category": "park",
+    "nearest_poi_distance_m": 73.66233733384209,
+    "nearest_poi_name": "Sackett Place",
+    "poi_count_within_threshold": 3,
+    "is_exposure_relevant": true,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-03",
+    "category": "playground",
+    "nearest_poi_distance_m": 352.9685013747071,
+    "nearest_poi_name": "unnamed",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-03",
+    "category": "school",
+    "nearest_poi_distance_m": 254.58385137577616,
+    "nearest_poi_name": "Al-Madinah School",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-03",
+    "category": "park",
+    "nearest_poi_distance_m": 52.91330035219706,
+    "nearest_poi_name": "Gowanus Waterfront Park",
+    "poi_count_within_threshold": 2,
+    "is_exposure_relevant": true,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-04",
+    "category": "playground",
+    "nearest_poi_distance_m": 455.9478898406748,
+    "nearest_poi_name": "unnamed",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-04",
+    "category": "school",
+    "nearest_poi_distance_m": 112.18378080821363,
+    "nearest_poi_name": "City Life Academy",
+    "poi_count_within_threshold": 1,
+    "is_exposure_relevant": true,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-04",
+    "category": "park",
+    "nearest_poi_distance_m": 252.18218961132658,
+    "nearest_poi_name": "300 Huntington Esplanade",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-05",
+    "category": "playground",
+    "nearest_poi_distance_m": 436.63758743932516,
+    "nearest_poi_name": "Ennis Playground Childrens Play Area",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-05",
+    "category": "school",
+    "nearest_poi_distance_m": 271.7789042713454,
+    "nearest_poi_name": "International School of Brooklyn",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-05",
+    "category": "park",
+    "nearest_poi_distance_m": 18.78504443704167,
+    "nearest_poi_name": "300 Huntington Esplanade",
+    "poi_count_within_threshold": 3,
+    "is_exposure_relevant": true,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-06",
+    "category": "playground",
+    "nearest_poi_distance_m": 386.92724998157325,
+    "nearest_poi_name": "Ennis Playground Childrens Play Area",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-06",
+    "category": "school",
+    "nearest_poi_distance_m": 501.9590056234032,
+    "nearest_poi_name": "International School of Brooklyn",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-06",
+    "category": "park",
+    "nearest_poi_distance_m": 137.3416553871871,
+    "nearest_poi_name": "Lowe's Esplanade",
+    "poi_count_within_threshold": 2,
+    "is_exposure_relevant": true,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-07",
+    "category": "playground",
+    "nearest_poi_distance_m": 522.3799506223977,
+    "nearest_poi_name": "unnamed",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-07",
+    "category": "school",
+    "nearest_poi_distance_m": 762.7904574666235,
+    "nearest_poi_name": "P.S. 124 - Silas B. Dutcher School",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-07",
+    "category": "park",
+    "nearest_poi_distance_m": 216.90403605939858,
+    "nearest_poi_name": "Red Hook Park",
+    "poi_count_within_threshold": 1,
+    "is_exposure_relevant": true,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-08",
+    "category": "playground",
+    "nearest_poi_distance_m": 675.8264723717926,
+    "nearest_poi_name": "unnamed",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-08",
+    "category": "school",
+    "nearest_poi_distance_m": 771.5208700246478,
+    "nearest_poi_name": "Al-Noor School",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-08",
+    "category": "park",
+    "nearest_poi_distance_m": 324.67842308866005,
+    "nearest_poi_name": "Red Hook Park",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-09",
+    "category": "playground",
+    "nearest_poi_distance_m": 828.8522261088382,
+    "nearest_poi_name": "unnamed",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-09",
+    "category": "school",
+    "nearest_poi_distance_m": 805.7140385962748,
+    "nearest_poi_name": "BASIS Independent Brooklyn",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-09",
+    "category": "park",
+    "nearest_poi_distance_m": 415.07316466694493,
+    "nearest_poi_name": "Red Hook Park",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-10",
+    "category": "playground",
+    "nearest_poi_distance_m": 909.6567216313967,
+    "nearest_poi_name": "unnamed",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-10",
+    "category": "school",
+    "nearest_poi_distance_m": 900.3784355558661,
+    "nearest_poi_name": "BASIS Independent Brooklyn",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  },
+  {
+    "site_id": "gow-10",
+    "category": "park",
+    "nearest_poi_distance_m": 421.92620184389165,
+    "nearest_poi_name": "Erie Basin Park",
+    "poi_count_within_threshold": 0,
+    "is_exposure_relevant": false,
+    "data_source": "real"
+  }
+]
